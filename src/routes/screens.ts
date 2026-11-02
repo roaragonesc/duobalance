@@ -1,14 +1,24 @@
-export const authScreens = [
-  { path: '/login', title: 'Inicio de sesión' },
-  { path: '/register', title: 'Registro' },
-  { path: '/forgot-password', title: 'Recuperar contraseña' },
-] as const
+import type { ComponentType, SVGProps } from 'react'
+import {
+  BarsIcon,
+  CardIcon,
+  HomeIcon,
+  RefreshIcon,
+  UserIcon,
+  UsersIcon,
+} from '../components/ui/icons'
 
-export const appScreens = [
-  { path: '/dashboard', title: 'Dashboard' },
-  { path: '/expenses', title: 'Gastos' },
-  { path: '/incomes', title: 'Ingresos' },
-  { path: '/balance', title: 'Balance' },
-  { path: '/space', title: 'Espacio compartido' },
-  { path: '/profile', title: 'Mi perfil' },
-] as const
+type AppScreen = {
+  path: string
+  title: string
+  icon: ComponentType<SVGProps<SVGSVGElement>>
+}
+
+export const appScreens: readonly AppScreen[] = [
+  { path: '/dashboard', title: 'Inicio', icon: HomeIcon },
+  { path: '/expenses', title: 'Gastos', icon: CardIcon },
+  { path: '/incomes', title: 'Ingresos', icon: BarsIcon },
+  { path: '/balance', title: 'Balance', icon: RefreshIcon },
+  { path: '/space', title: 'Espacio', icon: UsersIcon },
+  { path: '/profile', title: 'Mi perfil', icon: UserIcon },
+]
