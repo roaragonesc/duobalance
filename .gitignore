@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 node_modules/
 dist/
+dist-demo/
 .env
 .env.*
 !.env.example

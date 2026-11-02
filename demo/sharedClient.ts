@@ -5,7 +5,7 @@ type Resource = {
   apply: (data: unknown) => void
 }
 
-const enabled = import.meta.env.VITE_MOCK_SHARED === '1'
+const enabled = import.meta.env.MODE !== 'pages-demo' && import.meta.env.VITE_MOCK_SHARED === '1'
 const resources = new Map<string, Resource>()
 const lifecycle = new AbortController()
 let queue = Promise.resolve()
