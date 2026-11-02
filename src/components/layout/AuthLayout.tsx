@@ -1,17 +1,21 @@
 import { Outlet } from 'react-router'
-import Brand from './Brand'
+import AuthBackdrop from '../../features/auth/components/AuthBackdrop'
+import Logo from '../ui/Logo'
 
 export default function AuthLayout() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-navy px-4 py-10">
+    <div className="relative isolate flex min-h-dvh flex-col items-center justify-center bg-navy px-4 py-10">
+      <AuthBackdrop />
       <header className="text-center">
-        <Brand />
-        <p className="mt-2 text-sm text-ice">Órbita Nexo</p>
+        <Logo tone="onDark" />
+        <p className="mt-2 text-[17px] text-white">
+          Finanzas justas. Objetivos compartidos.
+        </p>
       </header>
       <main
         id="main-content"
         tabIndex={-1}
-        className="w-full max-w-md rounded-3xl bg-ice p-6 text-center shadow-xl sm:p-10"
+        className="mt-8 flex w-full justify-center focus:outline-none"
       >
         <Outlet />
       </main>

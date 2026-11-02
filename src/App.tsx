@@ -1,9 +1,10 @@
 import { RouterProvider } from 'react-router/dom'
+import AuthProvider from './features/auth/components/AuthProvider'
 import { router } from './routes/router'
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <a
         href="#main-content"
         className="sr-only z-50 rounded-lg bg-mint px-4 py-3 font-semibold text-navy focus:not-sr-only focus:fixed focus:top-4 focus:left-4"
@@ -11,6 +12,6 @@ export default function App() {
         Saltar al contenido
       </a>
       <RouterProvider router={router} />
-    </>
+    </AuthProvider>
   )
 }
