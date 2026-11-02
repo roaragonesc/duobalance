@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter, createHashRouter, Navigate } from 'react-router'
 import AppLayout from '../components/layout/AppLayout'
 import AuthCallback from '../pages/AuthCallback'
 import AuthLayout from '../components/layout/AuthLayout'
@@ -28,7 +28,9 @@ import ProtectedRoute from './ProtectedRoute'
 import PublicOnlyRoute from './PublicOnlyRoute'
 import { AUTH_CALLBACK_PATH } from '../features/auth/navigation'
 
-export const router = createBrowserRouter([
+const createRouter = import.meta.env.MODE === 'pages-demo' ? createHashRouter : createBrowserRouter
+
+export const router = createRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   {
     element: <SimpleLayout />,

@@ -54,6 +54,34 @@ restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
 
 ## Arquitectura
 
+### Demo estática en GitHub Pages
+
+La demo se compila por separado con `npm run build:demo` en `dist-demo/`.
+Para probarla localmente: `npm run preview:demo` y abrir
+`http://127.0.0.1:4175/duobalance/`. Usa rutas hash (`#/login`) para permitir
+recargas en GitHub Pages. No carga archivos `.env`, no usa Supabase y nunca
+habilita el servidor compartido E2E. El build normal conserva su bloqueo de mocks.
+`npm run test:demo` compila y comprueba la demo estática en Chromium con viewport
+móvil, recarga de rutas, persistencia, confirmación y recuperación simuladas.
+
+Solo deben introducirse datos ficticios: las cuentas y contraseñas mock se
+guardan en el navegador, sin protección para datos reales. Cada dispositivo
+tiene su propia demo; las invitaciones solo funcionan en el navegador donde se
+crearon y no envían correos. El panel permite cambiar entre usuarios.
+
+Para publicar (el repositorio puede permanecer privado, con un plan compatible):
+
+1. En GitHub, Settings → Pages → Source: **GitHub Actions**.
+2. Si el entorno `github-pages` restringe ramas, autorizar `ro-dev`.
+3. Subir los cambios a `ro-dev`. El workflow `demo-pages.yml` compila y publica
+   únicamente `dist-demo/`, sin código fuente ni mapas de fuentes.
+4. Consultar el resultado en Actions. URL prevista:
+   `https://roaragonesc.github.io/duobalance/`.
+
+La web puede ser pública aunque el repositorio sea privado. No cambiar la
+visibilidad del repositorio para habilitar Pages. Este despliegue no es la
+aplicación de producción ni certifica el backend financiero.
+
 ```text
 src/
   assets/               Logotipos DuoBalance (fondo oscuro y claro)

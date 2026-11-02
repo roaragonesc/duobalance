@@ -1,6 +1,7 @@
 import { AuthApiError } from '@supabase/supabase-js'
 import type { LoginCredentials, RegistrationData } from '../src/features/auth/types/auth'
 import type { SignUpResult } from '../src/features/auth/services/authService'
+import { demoUrl } from './navigation'
 import {
   addDemoUser,
   createDemoToken,
@@ -19,14 +20,11 @@ export function getEmailConfirmationUrl(next?: string): string {
     .filter((user) => !user.confirmed && user.confirmationToken)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
   const token = account?.confirmationToken
-  const url = new URL('/auth/callback', window.location.origin)
-  if (token) {
-    url.searchParams.set('token_hash', token)
-    url.searchParams.set('type', 'signup')
-  }
   const redirect = next ?? account?.confirmationNext
-  if (redirect) url.searchParams.set('next', redirect)
-  return url.toString()
+  return demoUrl('/auth/callback', {
+    ...(token ? { token_hash: token, type: 'signup' } : {}),
+    ...(redirect ? { next: redirect } : {}),
+  })
 }
 
 export async function signIn({ email, password }: LoginCredentials): Promise<void> {
@@ -127,9 +125,7 @@ export function beginPasswordReset(token: string): string {
   )
   if (!account) throw new AuthApiError('Recovery link expired', 400, 'otp_expired')
   updateDemoState((state) => ({ ...state, user: account.key }))
-  const url = new URL('/reset-password', window.location.origin)
-  url.searchParams.set('mock_token', token)
-  return url.toString()
+  return demoUrl('/reset-password', { mock_token: token })
 }
 
 export async function updatePassword(password: string): Promise<void> {

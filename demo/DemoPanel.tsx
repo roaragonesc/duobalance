@@ -8,13 +8,14 @@ import {
   type DemoAccount,
 } from './demoStore'
 import { resetDemoMovements } from './sampleData'
+import { demoUrl } from './navigation'
 
 function confirmationUrl(token: string, next: string | null): string {
-  const url = new URL('/auth/callback', window.location.origin)
-  url.searchParams.set('token_hash', token)
-  url.searchParams.set('type', 'signup')
-  if (next) url.searchParams.set('next', next)
-  return url.toString()
+  return demoUrl('/auth/callback', {
+    token_hash: token,
+    type: 'signup',
+    ...(next ? { next } : {}),
+  })
 }
 
 export function DemoPanel() {
@@ -34,14 +35,16 @@ export function DemoPanel() {
 
   function handleUserChange(event: ChangeEvent<HTMLSelectElement>) {
     setDemoUser(event.target.value || null)
-    window.location.assign('/')
+    window.location.assign(demoUrl('/'))
+    if (import.meta.env.MODE === 'pages-demo') window.location.reload()
   }
 
   async function handleReset() {
     try {
       await resetDemoState()
       await resetDemoMovements()
-      window.location.assign('/login')
+      window.location.assign(demoUrl('/login'))
+      if (import.meta.env.MODE === 'pages-demo') window.location.reload()
     } catch (error) {
       console.error('No se pudieron restablecer los datos mock.', error)
       window.alert('No se pudieron restablecer los datos mock. Recarga e inténtalo de nuevo.')
@@ -50,6 +53,7 @@ export function DemoPanel() {
 
   function handlePasswordReset(token: string) {
     window.location.assign(beginPasswordReset(token))
+    if (import.meta.env.MODE === 'pages-demo') window.location.reload()
   }
 
   return (
@@ -67,7 +71,8 @@ export function DemoPanel() {
         {expanded ? 'Ocultar panel mock' : 'Mostrar panel mock'}
       </button>
       <div id={contentId} hidden={!expanded}>
-        <p className="my-2 font-bold uppercase tracking-wide">Modo mock · solo desarrollo</p>
+        <p className="my-2 font-bold uppercase tracking-wide">Modo mock · datos ficticios</p>
+        <p className="mb-2">Demo local: no introduzcas datos ni contraseñas reales. No se sincroniza entre dispositivos.</p>
         <label htmlFor={selectId} className="mb-1 block font-semibold">
           Usuario de prueba
         </label>

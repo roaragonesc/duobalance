@@ -4,6 +4,7 @@ import {
   type Workspace,
 } from '../src/features/spaces/services/spaceService'
 import type { CreateSpaceData, SplitMethod } from '../src/features/spaces/types/space'
+import { demoUrl } from './navigation'
 import {
   createDemoToken,
   demoDelay,
@@ -92,9 +93,7 @@ export async function invitePartner(email: string): Promise<string> {
       },
     ],
   }))
-  const url = new URL(INVITATION_PATH, window.location.origin)
-  url.searchParams.set('token', token)
-  return url.toString()
+  return demoUrl(INVITATION_PATH, { token })
 }
 
 export async function acceptInvitation(token: string): Promise<string> {

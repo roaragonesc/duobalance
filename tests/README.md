@@ -44,6 +44,16 @@ Los cambios del panel esperan la recarga real y los escenarios autenticados espe
 
 ## Comandos
 
+La demo estática de Pages se valida por separado con `npm run test:demo`
+(`playwright.demo.config.ts` y `pages-demo.spec.ts`). Usa el build estático,
+viewport móvil, datos locales de cada navegador y guardia contra peticiones
+externas o al servidor compartido. No utiliza las fixtures de escenarios E2E
+porque ese servidor no existe en GitHub Pages.
+Al pasar de login a recuperación, espera el encabezado de recuperación antes de
+rellenar el correo: ambas pantallas usan el mismo nombre accesible para el campo.
+El estado de confirmación solo aparece tras una solicitud válida completada;
+`src/pages/ForgotPassword.test.tsx` comprueba éxito, validación y error.
+
 - `npm run test:unit`: pruebas unitarias Vitest de `src/`.
 - `npm run test:db`: pruebas PostgreSQL de Vitest; no se ejecutan al lanzar Playwright.
 - `npm run test:e2e`: suite E2E completa.

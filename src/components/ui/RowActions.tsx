@@ -19,7 +19,9 @@ export default function RowActions({
   canEdit,
   readOnlyNote,
 }: RowActionsProps) {
-  if (!canEdit) return <span className="sr-only">{readOnlyNote}</span>
+  if (!canEdit) {
+    return <span className="relative"><span className="sr-only">{readOnlyNote}</span></span>
+  }
   return (
     <div className="flex justify-end gap-1">
       <Link

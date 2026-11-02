@@ -1,4 +1,4 @@
-// Vite plugin for development mock mode. Never loaded during a production build.
+// Used by development mocks and the explicitly isolated Pages demo build.
 import path from 'node:path'
 import type { Plugin } from 'vite'
 
@@ -31,8 +31,11 @@ export function demoPlugin(): Plugin {
       const replacement = replacements[relative]
       return replacement ? path.join(demoDir, replacement) : null
     },
-    transformIndexHtml(html) {
-      return html.replace('/src/main.tsx', '/demo/main.tsx')
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        return html.replace('/src/main.tsx', '/demo/main.tsx')
+      },
     },
   }
 }

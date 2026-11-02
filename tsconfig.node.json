@@ -22,6 +22,7 @@
   },
   "include": [
     "vite.config.ts",
+    "vite.pages.config.ts",
     "demo/vitePlugin.ts",
     "vitest.config.ts",
     "playwright.config.ts",
