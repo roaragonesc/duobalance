@@ -4,7 +4,10 @@ import { RegisterPage } from './pages/RegisterPage'
 test('TC21_usarLaDemoEstaticaDesdeMovilSinBackend', async ({ page }) => {
   await page.goto('./')
   await expect(page).toHaveURL(/\/duobalance\/#\/login$/)
-  await page.getByLabel('Usuario de prueba').selectOption('rocio')
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByLabel('Usuario de prueba').selectOption('rocio'),
+  ])
   await expect(page).toHaveURL(/\/duobalance\/#\/dashboard$/)
   await page.getByRole('button', { name: 'Ocultar panel mock' }).click()
   const skipLink = page.getByRole('link', { name: 'Saltar al contenido' })
@@ -25,7 +28,10 @@ test('TC21_usarLaDemoEstaticaDesdeMovilSinBackend', async ({ page }) => {
   await page.reload()
   await expect(page).toHaveURL(/\/duobalance\/#\/expenses$/)
   await expect(row).toContainText('12,50')
-  await page.getByRole('button', { name: 'Restablecer datos de prueba' }).click()
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByRole('button', { name: 'Restablecer datos de prueba' }).click(),
+  ])
   await expect(page).toHaveURL(/\/duobalance\/#\/login$/)
   await expect(page.getByLabel('Usuario de prueba')).toHaveValue('')
 })
@@ -43,14 +49,21 @@ test('TC22_confirmarYRecuperarUnaCuentaEnLaDemoEstatica', async ({ page }) => {
   await page.getByRole('button', { name: 'Confirmar mi correo' }).click()
   await expect(page).toHaveURL(/\/duobalance\/#\/onboarding$/)
   await page.getByRole('button', { name: 'Mostrar panel mock' }).click()
-  await page.getByLabel('Usuario de prueba').selectOption('')
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByLabel('Usuario de prueba').selectOption(''),
+  ])
   await expect(page).toHaveURL(/\/duobalance\/#\/login$/)
   await page.getByRole('button', { name: 'Ocultar panel mock' }).click()
   await page.getByRole('link', { name: 'Recuperar contraseña' }).click()
   await page.getByLabel('Correo electrónico').fill(email)
   await page.getByRole('button', { name: 'Enviar enlace' }).click()
+  await expect(page.getByRole('status')).toContainText('Si existe una cuenta con ese correo')
   await page.getByRole('button', { name: 'Mostrar panel mock' }).click()
-  await page.getByRole('button', { name: `Abrir recuperación de ${email}` }).click()
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByRole('button', { name: `Abrir recuperación de ${email}` }).click(),
+  ])
   await expect(page).toHaveURL(/\/duobalance\/#\/reset-password\?mock_token=/)
   await expect(page.getByLabel('Nueva contraseña', { exact: true })).toBeVisible()
 })
