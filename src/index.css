@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@theme {
+    --color-navy: #0B2038;
+    --color-mint: #47DDB9;
+    --color-ice: #EAF6FA;
+}
+
+:root {
+    font-family: Inter, system-ui, sans-serif;
+    color: #0B2038;
+    background-color: #FFFFFF;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+@layer base {
+    a:focus-visible {
+        outline: 3px solid currentColor;
+        outline-offset: 4px;
+    }
+}
