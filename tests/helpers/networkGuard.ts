@@ -1,11 +1,12 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
-export async function blockSupabaseRequests(page: Page): Promise<string[]> {
+export async function blockSupabaseRequests(page: Page | BrowserContext): Promise<string[]> {
   const requests: string[] = []
 
   await page.route('**/*', async (route) => {
     const requestUrl = new URL(route.request().url())
-    if (requestUrl.hostname.endsWith('.supabase.co') || requestUrl.port === '54321') {
+    if (!['127.0.0.1', 'localhost', '[::1]'].includes(requestUrl.hostname) ||
+        requestUrl.port === '54321') {
       requests.push(requestUrl.toString())
       await route.abort()
       return

@@ -28,7 +28,7 @@ export async function createSpace(data: CreateSpaceData): Promise<string> {
   const user = currentUser()
   if (getDemoSpace(user)) throw new SpaceError('already_in_space')
   const id = `space-${user}-${Date.now()}`
-  updateDemoState((state) => ({
+  await updateDemoState((state) => ({
     ...state,
     spaces: [
       ...state.spaces,
@@ -78,7 +78,7 @@ export async function invitePartner(email: string): Promise<string> {
 
   const token = createDemoToken()
   const createdAt = new Date()
-  updateDemoState((current) => ({
+  await updateDemoState((current) => ({
     ...current,
     invitations: [
       ...current.invitations,
@@ -115,7 +115,7 @@ export async function acceptInvitation(token: string): Promise<string> {
   if (!space) throw new SpaceError('invalid_invitation')
   if (space.members.length >= 2) throw new SpaceError('space_full')
 
-  updateDemoState((current) => ({
+  await updateDemoState((current) => ({
     ...current,
     spaces: current.spaces.map((candidate) =>
       candidate.id === invitation.spaceId
@@ -134,7 +134,7 @@ export async function updateSplitMethod(spaceId: string, splitMethod: SplitMetho
   const user = currentUser()
   const space = getDemoState().spaces.find((candidate) => candidate.id === spaceId)
   if (!space || space.owner !== user) throw new SpaceError('not_space_owner')
-  updateDemoState((state) => ({
+  await updateDemoState((state) => ({
     ...state,
     spaces: state.spaces.map((candidate) =>
       candidate.id === spaceId ? { ...candidate, splitMethod } : candidate,

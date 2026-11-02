@@ -4,6 +4,7 @@ import { isCategoryId } from '../src/features/expenses/categories'
 import type { ExpenseCategoryId, ExpenseKind } from '../src/features/expenses/types'
 import type { PendingBalance } from '../src/features/dashboard/types'
 import { getDemoState, isSpaceOwner } from './demoStore'
+import { persistSharedMock, registerSharedResource } from './sharedClient'
 
 /** A = creator of the space (Rocío), B = invited partner (Pablo). */
 type Person = 'A' | 'B'
@@ -183,11 +184,19 @@ export const expenses = storedMovements.expenses
 export const incomes = storedMovements.incomes
 export const settlements = storedMovements.settlements
 
+registerSharedResource('movements', () => ({ expenses, incomes, settlements }), (data) => {
+  if (!isDemoMovements(data)) throw new Error('Movimientos mock compartidos no válidos.')
+  expenses.splice(0, expenses.length, ...data.expenses)
+  incomes.splice(0, incomes.length, ...data.incomes)
+  settlements.splice(0, settlements.length, ...data.settlements)
+})
+
 export function persistDemoMovements() {
   localStorage.setItem(
     MOVEMENTS_STORAGE_KEY,
     JSON.stringify({ expenses, incomes, settlements } satisfies DemoMovements),
   )
+  return persistSharedMock('movements')
 }
 
 export function resetDemoMovements() {
@@ -195,7 +204,7 @@ export function resetDemoMovements() {
   expenses.splice(0, expenses.length, ...initial.expenses)
   incomes.splice(0, incomes.length, ...initial.incomes)
   settlements.splice(0, settlements.length, ...initial.settlements)
-  persistDemoMovements()
+  return persistDemoMovements()
 }
 
 // Perspective of the signed-in member.

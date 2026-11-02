@@ -9,6 +9,8 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 - `npm install`: instalar las dependencias del proyecto.
 - `npm run dev`: iniciar Vite en modo mock (sin llamadas a Supabase).
 - `npm run dev:mock`: alias explícito del modo mock.
+- `npm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
+  (`VITE_DATA_MODE=mock`), sin conectar a Supabase.
 - `npm run test:e2e`: ejecutar los flujos Playwright en Chromium.
 - `npm run build`: comprobar TypeScript y generar la aplicación en `dist/`.
 - `npm run lint`: ejecutar Oxlint.

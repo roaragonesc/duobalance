@@ -1,11 +1,12 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const port = 4174
-const baseURL = `http://localhost:${port}`
+const baseURL = `http://127.0.0.1:${port}`
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
+  timeout: 90_000,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [
@@ -16,6 +17,7 @@ export default defineConfig({
   outputDir: 'test-results/artifacts',
   use: {
     baseURL,
+    serviceWorkers: 'block',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -30,6 +32,6 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: false,
     timeout: 30_000,
-    env: { ...process.env, VITE_DATA_MODE: 'mock' },
+    env: { ...process.env, VITE_DATA_MODE: 'mock', VITE_MOCK_SHARED: '1' },
   },
 })

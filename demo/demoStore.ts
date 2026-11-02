@@ -1,6 +1,7 @@
 // Development-only mock state. Vite excludes this module from production builds.
 import { useSyncExternalStore } from 'react'
 import type { SplitMethod } from '../src/features/spaces/types/space'
+import { persistSharedMock, registerSharedResource, syncSharedMock } from './sharedClient'
 
 export const DEMO_PASSWORD = 'Demo1234!'
 const STORAGE_KEY = 'duobalance-mock-v1'
@@ -154,6 +155,15 @@ function load(): DemoState {
 
 let state = load()
 
+registerSharedResource('state', () => ({ ...state, user: null }), (data) => {
+  if (!isDemoState(data)) throw new Error('Datos compartidos mock no válidos.')
+  const next = { ...data, user: state.user }
+  if (JSON.stringify(next) !== JSON.stringify(state)) {
+    state = next
+    notify()
+  }
+})
+
 function notify() {
   listeners.forEach((listener) => listener())
 }
@@ -179,15 +189,20 @@ export function getDemoState(): DemoState {
   return state
 }
 
-export function updateDemoState(change: (current: DemoState) => DemoState) {
+export async function updateDemoState(change: (current: DemoState) => DemoState) {
+  const previous = JSON.stringify({ ...state, user: null })
   state = change(state)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  if (previous !== JSON.stringify({ ...state, user: null })) {
+    await persistSharedMock('state')
+  }
   notify()
 }
 
-export function resetDemoState() {
+export async function resetDemoState() {
   state = initialState()
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  await persistSharedMock('state')
   notify()
 }
 
@@ -225,7 +240,7 @@ export function findDemoUserByEmail(email: string): DemoAccount | null {
 }
 
 export function addDemoUser(user: DemoAccount) {
-  updateDemoState((current) => ({
+  return updateDemoState((current) => ({
     ...current,
     users: { ...current.users, [user.key]: user },
   }))
@@ -250,9 +265,9 @@ export function getDemoSpace(key: DemoUserKey): DemoSpace | null {
   return state.spaces.find((space) => space.members.includes(key)) ?? null
 }
 
-/** Sample transactions are seeded only for the Casa demo couple. */
+/** Every existing space can contain movements, not just the seeded demo couple. */
 export function hasSampleData(spaceId: string): boolean {
-  return spaceId === 'space-casa'
+  return state.spaces.some((space) => space.id === spaceId && space.members.includes(state.user ?? ''))
 }
 
 export function isSpaceOwner(): boolean {
@@ -260,6 +275,7 @@ export function isSpaceOwner(): boolean {
   return user ? state.spaces.some((space) => space.owner === user) : true
 }
 
-export function demoDelay(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 25))
+export async function demoDelay(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 25))
+  await syncSharedMock()
 }

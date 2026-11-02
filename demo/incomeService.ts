@@ -22,7 +22,7 @@ export async function getMonthIncomes(spaceId: string, month: MonthKey): Promise
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
   const list = incomes
-    .filter((income) => inMonth(income.date, month))
+    .filter((income) => income.spaceId === spaceId && inMonth(income.date, month))
     .sort((a, b) => b.date.localeCompare(a.date))
     .map(toIncome)
   const myCents = sum(list.filter((income) => income.owner === 'me'))
@@ -50,11 +50,11 @@ export async function saveIncome(spaceId: string, input: IncomeInput, id?: strin
   } else {
     incomes.push({ ...input, id: newId('inc'), spaceId, by: viewer() })
   }
-  persistDemoMovements()
+  await persistDemoMovements()
 }
 
 export async function deleteIncome(id: string): Promise<void> {
   await demoDelay()
   incomes.splice(ownIncomeIndex(id), 1)
-  persistDemoMovements()
+  await persistDemoMovements()
 }

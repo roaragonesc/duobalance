@@ -86,5 +86,5 @@ export async function registerSettlement(spaceId: string, input: SettlementInput
   }
   const debtor = pending.debtor === 'me' ? viewer() : viewer() === 'A' ? 'B' : 'A'
   settlements.push({ ...input, id: newId('set'), spaceId, by: debtor })
-  persistDemoMovements()
+  await persistDemoMovements()
 }

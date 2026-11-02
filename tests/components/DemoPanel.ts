@@ -9,10 +9,18 @@ export class DemoPanel {
   }
 
   async resetMockData() {
-    await this.page.getByRole('button', { name: 'Restablecer datos de prueba' }).click()
+    await Promise.all([
+      this.page.waitForEvent('domcontentloaded'),
+      this.page.getByRole('button', { name: 'Restablecer datos de prueba' }).click(),
+    ])
+    await this.page.getByRole('complementary', { name: 'Modo mock de desarrollo' }).waitFor()
   }
 
   async selectUser(user: DemoUserKey | null) {
-    await this.page.getByLabel('Usuario de prueba').selectOption(user ?? '')
+    await Promise.all([
+      this.page.waitForEvent('domcontentloaded'),
+      this.page.getByLabel('Usuario de prueba').selectOption(user ?? ''),
+    ])
+    await this.page.getByRole('complementary', { name: 'Modo mock de desarrollo' }).waitFor()
   }
 }

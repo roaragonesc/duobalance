@@ -10,7 +10,7 @@ export async function updateDisplayName(userId: string, name: string): Promise<s
   const key = demoUserFromId(userId)
   const displayName = name.trim()
   const account = getDemoState().users[key]
-  updateDemoState((state) => ({
+  await updateDemoState((state) => ({
     ...state,
     users: { ...state.users, [key]: { ...account, name: displayName } },
   }))

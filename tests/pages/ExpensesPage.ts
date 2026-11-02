@@ -22,5 +22,25 @@ export class ExpensesPage {
       await this.page.getByRole('radio', { name: /Individual/ }).check()
     }
     await this.page.getByRole('button', { name: 'Añadir gasto' }).click()
+    await this.page.waitForURL((url) => url.pathname === '/expenses')
+  }
+
+  row(description: string) {
+    return this.page.getByRole('row').filter({
+      has: this.page.getByRole('rowheader', { name: description, exact: true }),
+    })
+  }
+
+  async visit() {
+    await this.page.goto('/expenses')
+  }
+
+  async editAmount(description: string, amount: string) {
+    const edit = this.row(description).getByRole('link', { name: `Editar ${description}` })
+    await edit.focus()
+    await edit.press('Enter')
+    await this.page.getByLabel('Importe (€)').fill(amount)
+    await this.page.getByRole('button', { name: 'Guardar cambios' }).click()
+    await this.page.waitForURL((url) => url.pathname === '/expenses')
   }
 }

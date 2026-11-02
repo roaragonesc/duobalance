@@ -10,7 +10,7 @@ Responde en español. Trabaja como Senior QA Automation Engineer en las pruebas 
 ## Arquitectura
 
 - Playwright está separado de `src/`; la configuración está en `playwright.config.ts`.
-- Organiza specs por funcionalidad en `tests/e2e/auth/`, `tests/e2e/onboarding/` y `tests/e2e/expenses/`.
+- Mantén todos los specs juntos directamente en `tests/e2e/`, sin subcarpetas. Nombra cada test como `TC01_nombreDelTest`: numeración correlativa según el orden de los casos detallados de `CASOS_DE_PRUEBA_DUOBALANCE.md` y descripción en camelCase sin tildes, por ejemplo `TC01_iniciarSesionConCredencialesValidas`. Conserva la correspondencia con los IDs del documento.
 - Mantén Page Objects pequeños en `tests/pages/`; encapsulan localizadores e interacciones, nunca las expectativas.
 - Usa `tests/components/` para controles reutilizables de la interfaz de test, `tests/fixtures/` para fixtures tipadas, `tests/data/` para datos ficticios y `tests/helpers/` para utilidades compartidas con propósito claro.
 - Reserva `tests/api/` para pruebas de API cuando exista una API propia; no inventes endpoints.
@@ -38,6 +38,9 @@ Responde en español. Trabaja como Senior QA Automation Engineer en las pruebas 
 
 - Cada test debe poder ejecutarse en solitario y en cualquier orden; no compartas estado entre workers ni dependas de otro test.
 - Mantén las expectativas en los specs. Usa Page Objects para interacción y fixtures para el aislamiento.
+- Cada resultado esperado se comprueba explícitamente con `await expect(...)` en el spec, dentro del `test.step()` correspondiente. No crees métodos como `checkEmail()`, `verifyBalance()` o `assertExpense()`, ni helpers que oculten comprobaciones. Los Page Objects solo exponen acciones y localizadores: por ejemplo, `await expect(page.getByLabel('Correo electrónico')).toHaveValue(email)`.
+- Sigue los IDs y pasos de `CASOS_DE_PRUEBA_DUOBALANCE.md`; no cambies ese documento sin petición expresa. Distingue acciones, resultados y preparación.
+- Para recorridos de pareja usa dos BrowserContexts, un escenario mock compartido por test y sesiones independientes. Nunca copies localStorage entre usuarios.
 - Usa solo funcionalidades implementadas: login, registro y confirmación mock, recuperación mock, rutas protegidas, espacios e invitaciones disponibles.
 - No cambies diseños ni reglas de negocio. Consulta `docs/ux/` si el caso afecta a la interfaz aprobada.
 - No uses `test.skip()`, `test.fixme()` ni `test.only()` para esconder defectos. Distingue defectos del producto, del test y del entorno.
@@ -45,7 +48,7 @@ Responde en español. Trabaja como Senior QA Automation Engineer en las pruebas 
 ## Comandos
 
 - `npm run test:e2e`: todos los tests Playwright.
-- `npm run test:e2e:file -- tests/e2e/auth/auth.spec.ts`: un archivo.
+- `npm run test:e2e:file -- tests/e2e/auth.spec.ts`: un archivo.
 - `npm run test:e2e:ui`: modo UI.
 - `npm run test:e2e:debug`: depuración.
 - `npm run test:unit`: pruebas unitarias; separadas de Playwright.
