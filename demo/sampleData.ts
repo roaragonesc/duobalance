@@ -10,6 +10,7 @@ type Person = 'A' | 'B'
 
 export type SampleExpense = {
   id: string
+  spaceId: string
   description: string
   amountCents: number
   date: string
@@ -20,6 +21,7 @@ export type SampleExpense = {
 
 export type SampleIncome = {
   id: string
+  spaceId: string
   description: string
   amountCents: number
   date: string
@@ -28,13 +30,14 @@ export type SampleIncome = {
 
 export type SampleSettlement = {
   id: string
+  spaceId: string
   date: string
   note: string | null
   amountCents: number
   by: Person
 }
 
-const expenseSeed: Omit<SampleExpense, 'id' | 'date'>[] = [
+const expenseSeed: Omit<SampleExpense, 'id' | 'date' | 'spaceId'>[] = [
   { description: 'Alquiler', amountCents: 55000, categoryId: 'housing', kind: 'shared', by: 'B' },
   { description: 'Supermercado', amountCents: 5680, categoryId: 'food', kind: 'shared', by: 'A' },
   { description: 'Gasolina', amountCents: 4500, categoryId: 'transport', kind: 'shared', by: 'A' },
@@ -44,7 +47,7 @@ const expenseSeed: Omit<SampleExpense, 'id' | 'date'>[] = [
   { description: 'Peluquería', amountCents: 1800, categoryId: 'other', kind: 'individual', by: 'B' },
 ]
 
-const incomeSeed: Omit<SampleIncome, 'id' | 'date'>[] = [
+const incomeSeed: Omit<SampleIncome, 'id' | 'date' | 'spaceId'>[] = [
   { description: 'Nómina', amountCents: 210000, by: 'A' },
   { description: 'Nómina', amountCents: 140000, by: 'B' },
   { description: 'Venta de segunda mano', amountCents: 4500, by: 'A' },
@@ -58,10 +61,16 @@ function dateIn(month: MonthKey, index: number) {
   return date > today ? today : date
 }
 
-function seedMonth<T>(seed: Omit<T, 'id' | 'date'>[], prefix: string, month: MonthKey): T[] {
+function seedMonth<T>(
+  seed: Omit<T, 'id' | 'date' | 'spaceId'>[],
+  prefix: string,
+  month: MonthKey,
+  spaceId: string,
+): T[] {
   return seed.map((item, index) => ({
     ...item,
     id: `${prefix}-${month}-${index}`,
+    spaceId,
     date: dateIn(month, index),
   }) as T)
 }
@@ -72,17 +81,22 @@ type DemoMovements = {
   settlements: SampleSettlement[]
 }
 
-const MOVEMENTS_STORAGE_KEY = 'duobalance-demo-movements-v1'
+const MOVEMENTS_STORAGE_KEY = 'duobalance-mock-movements-v2'
 
 function createInitialMovements(): DemoMovements {
   const now = currentMonth()
   const sampleMonths = [now, shiftMonth(now, -1)]
   return {
-    expenses: sampleMonths.flatMap((month) => seedMonth<SampleExpense>(expenseSeed, 'exp', month)),
-    incomes: sampleMonths.flatMap((month) => seedMonth<SampleIncome>(incomeSeed, 'inc', month)),
+    expenses: sampleMonths.flatMap((month) =>
+      seedMonth<SampleExpense>(expenseSeed, 'exp', month, 'space-casa'),
+    ),
+    incomes: sampleMonths.flatMap((month) =>
+      seedMonth<SampleIncome>(incomeSeed, 'inc', month, 'space-casa'),
+    ),
     settlements: [
       {
         id: 'set-0',
+        spaceId: 'space-casa',
         date: dateIn(shiftMonth(now, -1), 0),
         note: 'Bizum del mes',
         amountCents: 10000,
@@ -100,6 +114,7 @@ function isSampleExpense(value: unknown): value is SampleExpense {
   return (
     isRecord(value) &&
     typeof value.id === 'string' &&
+    typeof value.spaceId === 'string' &&
     typeof value.description === 'string' &&
     typeof value.amountCents === 'number' &&
     Number.isInteger(value.amountCents) &&
@@ -115,6 +130,7 @@ function isSampleIncome(value: unknown): value is SampleIncome {
   return (
     isRecord(value) &&
     typeof value.id === 'string' &&
+    typeof value.spaceId === 'string' &&
     typeof value.description === 'string' &&
     typeof value.amountCents === 'number' &&
     Number.isInteger(value.amountCents) &&
@@ -127,6 +143,7 @@ function isSampleSettlement(value: unknown): value is SampleSettlement {
   return (
     isRecord(value) &&
     typeof value.id === 'string' &&
+    typeof value.spaceId === 'string' &&
     typeof value.date === 'string' &&
     (typeof value.note === 'string' || value.note === null) &&
     typeof value.amountCents === 'number' &&
@@ -195,9 +212,9 @@ export function inMonth(date: string, month: MonthKey) {
 }
 
 /** Individual expenses are private: only their owner sees them. */
-export function visibleExpenses(month: MonthKey) {
+export function visibleExpenses(spaceId: string, month: MonthKey) {
   return expenses
-    .filter((expense) => inMonth(expense.date, month))
+    .filter((expense) => expense.spaceId === spaceId && inMonth(expense.date, month))
     .filter((expense) => expense.kind === 'shared' || expense.by === viewer())
     .sort((a, b) => b.date.localeCompare(a.date))
 }
@@ -207,28 +224,36 @@ export function sum<T extends { amountCents: number }>(items: T[]) {
 }
 
 /** Share of A in basis points. Illustrative only: rounding is undecided. */
-export function shareOfA(month: MonthKey) {
-  const space = getDemoState().spaces.find((candidate) => candidate.members.length === 2)
+export function shareOfA(spaceId: string, month: MonthKey) {
+  const space = getDemoState().spaces.find((candidate) => candidate.id === spaceId)
   if (space?.splitMethod !== 'proportional') return 5000
-  const monthIncomes = incomes.filter((income) => inMonth(income.date, month))
+  const monthIncomes = incomes.filter(
+    (income) => income.spaceId === spaceId && inMonth(income.date, month),
+  )
   const total = sum(monthIncomes)
   if (total === 0) return 5000
   return Math.round((sum(monthIncomes.filter((income) => income.by === 'A')) * 10000) / total)
 }
 
 /** Positive: B owes A. Negative: A owes B. */
-export function monthDebtOfB(month: MonthKey) {
-  const shared = expenses.filter((e) => e.kind === 'shared' && inMonth(e.date, month))
-  const dueByA = Math.round((sum(shared) * shareOfA(month)) / 10000)
+export function monthDebtOfB(spaceId: string, month: MonthKey) {
+  const shared = expenses.filter(
+    (e) => e.spaceId === spaceId && e.kind === 'shared' && inMonth(e.date, month),
+  )
+  const dueByA = Math.round((sum(shared) * shareOfA(spaceId, month)) / 10000)
   return sum(shared.filter((e) => e.by === 'A')) - dueByA
 }
 
-export function accumulatedDebtOfB(untilMonth: MonthKey) {
+export function accumulatedDebtOfB(spaceId: string, untilMonth: MonthKey) {
   const months = new Set(
-    expenses.map((e) => e.date.slice(0, 7)).filter((month) => month <= untilMonth),
+    expenses
+      .filter((expense) => expense.spaceId === spaceId)
+      .map((e) => e.date.slice(0, 7))
+      .filter((month) => month <= untilMonth),
   )
-  let debt = [...months].reduce((total, month) => total + monthDebtOfB(month), 0)
+  let debt = [...months].reduce((total, month) => total + monthDebtOfB(spaceId, month), 0)
   for (const settlement of settlements) {
+    if (settlement.spaceId !== spaceId) continue
     if (settlement.date.slice(0, 7) > untilMonth) continue
     debt += settlement.by === 'B' ? -settlement.amountCents : settlement.amountCents
   }

@@ -5,6 +5,7 @@ import {
 } from '../src/features/spaces/services/spaceService'
 import type { CreateSpaceData, SplitMethod } from '../src/features/spaces/types/space'
 import {
+  createDemoToken,
   demoDelay,
   demoUserFromId,
   getDemoSpace,
@@ -45,46 +46,98 @@ export async function getCurrentSpaceId(userId: string): Promise<string | null> 
 export async function getCurrentWorkspace(userId: string): Promise<Workspace> {
   await demoDelay()
   const key = demoUserFromId(userId)
-  const { names } = getDemoState()
+  const account = getDemoState().users[key]
   const space = getDemoSpace(key)
-  if (!space) return { displayName: names[key], space: null }
+  if (!space) return { displayName: account.name, space: null }
   const partner = space.members.find((member) => member !== key)
   return {
-    displayName: names[key],
+    displayName: account.name,
     space: {
       id: space.id,
       name: space.name,
       splitMethod: space.splitMethod,
       role: space.owner === key ? 'owner' : 'member',
       memberCount: space.members.length,
-      partnerName: partner ? names[partner] : null,
+      partnerName: partner ? getDemoState().users[partner]?.name ?? null : null,
     },
   }
 }
 
-// The demo cannot send emails or accept links: it only returns a sample link.
-export async function invitePartner(_email: string): Promise<string> {
+export async function invitePartner(email: string): Promise<string> {
   await demoDelay()
   const user = currentUser()
+  const normalizedEmail = email.trim().toLowerCase()
+  const state = getDemoState()
   const space = getDemoSpace(user)
-  if (!space || space.owner !== user) throw new SpaceError('not_space_owner')
-  if (space.members.length === 2) throw new SpaceError('space_full')
+  if (!space || !space.members.includes(user)) throw new SpaceError('not_space_owner')
+  if (space.members.length >= 2) throw new SpaceError('space_full')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    throw new SpaceError('invalid_email')
+  }
+  if (state.users[user]?.email === normalizedEmail) throw new SpaceError('cannot_invite_self')
+
+  const token = createDemoToken()
+  const createdAt = new Date()
+  updateDemoState((current) => ({
+    ...current,
+    invitations: [
+      ...current.invitations,
+      {
+        token,
+        email: normalizedEmail,
+        spaceId: space.id,
+        createdAt: createdAt.toISOString(),
+        expiresAt: new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        used: false,
+      },
+    ],
+  }))
   const url = new URL(INVITATION_PATH, window.location.origin)
-  url.searchParams.set('token', 'enlace-de-demostracion')
+  url.searchParams.set('token', token)
   return url.toString()
 }
 
-export async function acceptInvitation(_token: string): Promise<string> {
+export async function acceptInvitation(token: string): Promise<string> {
   await demoDelay()
-  throw new SpaceError('invalid_invitation')
+  const user = currentUser()
+  const state = getDemoState()
+  const invitation = state.invitations.find((candidate) => candidate.token === token)
+  if (!invitation) throw new SpaceError('invalid_invitation')
+  if (invitation.used) throw new SpaceError('invitation_used')
+  if (Date.parse(invitation.expiresAt) <= Date.now()) {
+    throw new SpaceError('invitation_expired')
+  }
+  if (state.users[user]?.email !== invitation.email) {
+    throw new SpaceError('invitation_email_mismatch')
+  }
+  if (getDemoSpace(user)) throw new SpaceError('already_in_space')
+  const space = state.spaces.find((candidate) => candidate.id === invitation.spaceId)
+  if (!space) throw new SpaceError('invalid_invitation')
+  if (space.members.length >= 2) throw new SpaceError('space_full')
+
+  updateDemoState((current) => ({
+    ...current,
+    spaces: current.spaces.map((candidate) =>
+      candidate.id === invitation.spaceId
+        ? { ...candidate, members: [...candidate.members, user] }
+        : candidate,
+    ),
+    invitations: current.invitations.map((candidate) =>
+      candidate.token === token ? { ...candidate, used: true } : candidate,
+    ),
+  }))
+  return space.id
 }
 
 export async function updateSplitMethod(spaceId: string, splitMethod: SplitMethod): Promise<void> {
   await demoDelay()
+  const user = currentUser()
+  const space = getDemoState().spaces.find((candidate) => candidate.id === spaceId)
+  if (!space || space.owner !== user) throw new SpaceError('not_space_owner')
   updateDemoState((state) => ({
     ...state,
-    spaces: state.spaces.map((space) =>
-      space.id === spaceId ? { ...space, splitMethod } : space,
+    spaces: state.spaces.map((candidate) =>
+      candidate.id === spaceId ? { ...candidate, splitMethod } : candidate,
     ),
   }))
 }

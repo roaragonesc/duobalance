@@ -31,48 +31,60 @@ const byDateDesc = (a: SampleSettlement, b: SampleSettlement) => b.date.localeCo
 export async function getMonthBalance(spaceId: string, month: MonthKey): Promise<BalanceMonth | null> {
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
-  const shared = sum(expenses.filter((e) => e.kind === 'shared' && inMonth(e.date, month)))
-  const monthIncomes = sum(incomes.filter((income) => inMonth(income.date, month)))
+  const shared = sum(
+    expenses.filter(
+      (e) => e.spaceId === spaceId && e.kind === 'shared' && inMonth(e.date, month),
+    ),
+  )
+  const monthIncomes = sum(
+    incomes.filter((income) => income.spaceId === spaceId && inMonth(income.date, month)),
+  )
   if (shared === 0 && monthIncomes === 0) return null
 
-  const shareA = shareOfA(month)
+  const shareA = shareOfA(spaceId, month)
   const dueA = Math.round((shared * shareA) / 10000)
   const a = { shareBasisPoints: shareA, contributionCents: dueA }
   const b = { shareBasisPoints: 10000 - shareA, contributionCents: shared - dueA }
 
   return {
-    month: toPending(monthDebtOfB(month)),
-    accumulated: toPending(accumulatedDebtOfB(month)),
+    month: toPending(monthDebtOfB(spaceId, month)),
+    accumulated: toPending(accumulatedDebtOfB(spaceId, month)),
     members: viewer() === 'A' ? { me: a, partner: b } : { me: b, partner: a },
     summary: {
       incomesCents: monthIncomes,
       sharedExpensesCents: shared,
       remainingCents: monthIncomes - shared,
     },
-    settlements: settlements.filter((s) => inMonth(s.date, month)).sort(byDateDesc).map(toSettlement),
+    settlements: settlements
+      .filter((s) => s.spaceId === spaceId && inMonth(s.date, month))
+      .sort(byDateDesc)
+      .map(toSettlement),
   }
 }
 
 export async function getSettlementHistory(spaceId: string): Promise<Settlement[] | null> {
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
-  return [...settlements].sort(byDateDesc).map(toSettlement)
+  return settlements
+    .filter((settlement) => settlement.spaceId === spaceId)
+    .sort(byDateDesc)
+    .map(toSettlement)
 }
 
 export async function getPendingDebt(spaceId: string): Promise<PendingBalance | null> {
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
-  return toPending(accumulatedDebtOfB(currentMonth()))
+  return toPending(accumulatedDebtOfB(spaceId, currentMonth()))
 }
 
 // The debtor pays the creditor; never more than the pending debt.
-export async function registerSettlement(_spaceId: string, input: SettlementInput): Promise<void> {
+export async function registerSettlement(spaceId: string, input: SettlementInput): Promise<void> {
   await demoDelay()
-  const pending = toPending(accumulatedDebtOfB(currentMonth()))
+  const pending = toPending(accumulatedDebtOfB(spaceId, currentMonth()))
   if (pending.debtor === null || input.amountCents > pending.amountCents) {
     throw new SettlementLimitError()
   }
   const debtor = pending.debtor === 'me' ? viewer() : viewer() === 'A' ? 'B' : 'A'
-  settlements.push({ ...input, id: newId('set'), by: debtor })
+  settlements.push({ ...input, id: newId('set'), spaceId, by: debtor })
   persistDemoMovements()
 }

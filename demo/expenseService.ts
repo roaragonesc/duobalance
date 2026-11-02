@@ -24,13 +24,13 @@ function toExpense({ by, ...expense }: SampleExpense): Expense {
 export async function getMonthExpenses(spaceId: string, month: MonthKey): Promise<ExpenseMonth | null> {
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
-  const visible = visibleExpenses(month)
+  const visible = visibleExpenses(spaceId, month)
   const shared = visible.filter((expense) => expense.kind === 'shared')
   return {
     totalCents: sum(visible),
     sharedCents: sum(shared),
     individualCents: sum(visible) - sum(shared),
-    pending: toPending(monthDebtOfB(month)),
+    pending: toPending(monthDebtOfB(spaceId, month)),
     expenses: visible.map(toExpense),
   }
 }
@@ -49,13 +49,13 @@ function ownExpenseIndex(id: string) {
   return index
 }
 
-export async function saveExpense(_spaceId: string, input: ExpenseInput, id?: string): Promise<void> {
+export async function saveExpense(spaceId: string, input: ExpenseInput, id?: string): Promise<void> {
   await demoDelay()
   if (id) {
     const index = ownExpenseIndex(id)
     expenses[index] = { ...expenses[index], ...input }
   } else {
-    expenses.push({ ...input, id: newId('exp'), by: viewer() })
+    expenses.push({ ...input, id: newId('exp'), spaceId, by: viewer() })
   }
   persistDemoMovements()
 }

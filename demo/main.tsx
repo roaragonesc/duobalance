@@ -1,4 +1,4 @@
-// Entry point used only by `npm run dev:demo` (see vite.config.ts).
+// Entry point used only when `VITE_DATA_MODE=mock` in development.
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../src/index.css'

@@ -42,13 +42,13 @@ function ownIncomeIndex(id: string) {
   return index
 }
 
-export async function saveIncome(_spaceId: string, input: IncomeInput, id?: string): Promise<void> {
+export async function saveIncome(spaceId: string, input: IncomeInput, id?: string): Promise<void> {
   await demoDelay()
   if (id) {
     const index = ownIncomeIndex(id)
     incomes[index] = { ...incomes[index], ...input }
   } else {
-    incomes.push({ ...input, id: newId('inc'), by: viewer() })
+    incomes.push({ ...input, id: newId('inc'), spaceId, by: viewer() })
   }
   persistDemoMovements()
 }

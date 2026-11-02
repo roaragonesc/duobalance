@@ -7,10 +7,48 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 ## Desarrollo
 
 - `npm install`: instalar las dependencias del proyecto.
-- `npm run dev`: iniciar Vite.
+- `npm run dev`: iniciar Vite en modo mock (sin llamadas a Supabase).
+- `npm run dev:mock`: alias explícito del modo mock.
+- `npm run test:e2e`: ejecutar los flujos Playwright en Chromium.
 - `npm run build`: comprobar TypeScript y generar la aplicación en `dist/`.
 - `npm run lint`: ejecutar Oxlint.
 - `npm run preview`: servir la compilación localmente.
+
+### Modo de datos
+
+El modo de desarrollo se configura con `VITE_DATA_MODE`:
+
+- `mock` (predeterminado): sustituye el proveedor de autenticación y todos los
+  servicios de datos por mocks locales. No inicia el cliente de Supabase ni
+  realiza peticiones a Auth, PostgREST o RPC.
+- `supabase`: usa los servicios reales. Requiere `VITE_SUPABASE_URL` y
+  `VITE_SUPABASE_PUBLISHABLE_KEY` en `.env.local`.
+
+Para volver temporalmente a Supabase, cambia `VITE_DATA_MODE=supabase` en
+`.env.local` y reinicia Vite. También puedes definir esa variable antes de
+`npm run dev`. Para compilar producción, el modo debe ser `supabase`; Vite
+rechaza explícitamente una compilación configurada con `mock`.
+
+Las cuentas seed del modo mock (contraseña común `Demo1234!`) son:
+
+| Correo | Escenario |
+| --- | --- |
+| `nuevo@duobalance.test` | Sin espacio |
+| `solo@duobalance.test` | Espacio con un miembro |
+| `rocio@duobalance.test` | Espacio compartido, creadora |
+| `pablo@duobalance.test` | Espacio compartido, invitado |
+| `ines@duobalance.test` | Disponible para invitaciones |
+| `mateo@duobalance.test` | Disponible para invitaciones |
+
+El panel «Modo mock» permite cambiar de cuenta, abrir los enlaces simulados de
+confirmación/recuperación y restablecer usuarios, espacios e interacciones. Los
+datos se guardan en `localStorage` de este navegador; no se sincronizan entre
+dispositivos. Las contraseñas registradas en este modo son solo credenciales
+ficticias de desarrollo.
+
+La primera vez, instala Chromium para Playwright con
+`npx playwright install chromium`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
+restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
 
 ## Arquitectura
 
@@ -32,6 +70,8 @@ src/
   lib/supabase/         Cliente de Supabase y tipos de la base de datos
   routes/               Router y catálogo de navegación de la aplicación
   types/                Reservada para tipos compartidos
+demo/                   Adaptadores mock solo para desarrollo
+tests/e2e/              Flujos E2E independientes con Playwright
 ```
 
 `App.tsx` monta el router y el enlace accesible para saltar al contenido.
@@ -40,8 +80,11 @@ La lógica de cada formulario vive en `features/` (validación y servicio) y en
 `hooks/useValidatedForm`; las páginas solo componen la interfaz.
 
 `routes/screens.ts` centraliza las rutas de la aplicación privada para que la
-navegación y el router no diverjan. Las pantallas de la aplicación siguen
-siendo provisionales (`PlaceholderPage`) a la espera de sus diseños.
+navegación y el router no diverjan. Los servicios mantienen contratos
+TypeScript comunes; durante desarrollo, el plugin de Vite sustituye sus
+implementaciones y el proveedor de autenticación por los adaptadores mock de
+`demo/`. El plugin solo se habilita con `VITE_DATA_MODE=mock` y con el servidor
+de desarrollo; el build de producción nunca empaqueta los mocks.
 
 ## Rutas
 
@@ -54,12 +97,12 @@ siendo provisionales (`PlaceholderPage`) a la espera de sus diseños.
 | `/reset-password` | Establecer nueva contraseña | AuthLightLayout | Diseño implementado |
 | `/onboarding` | Crea tu espacio (paso 1) | OnboardingLayout | Diseño implementado |
 | `/onboarding/invite` | Invita a tu pareja (paso 2) | OnboardingLayout | Diseño implementado |
-| `/dashboard` | Dashboard | AppLayout | Provisional |
-| `/expenses` | Gastos | AppLayout | Provisional |
-| `/incomes` | Ingresos | AppLayout | Provisional |
-| `/balance` | Balance | AppLayout | Provisional |
-| `/space` | Espacio compartido | AppLayout | Provisional |
-| `/profile` | Mi perfil | AppLayout | Provisional |
+| `/dashboard` | Dashboard | AppLayout | Implementado |
+| `/expenses` | Gastos | AppLayout | Implementado |
+| `/incomes` | Ingresos | AppLayout | Implementado |
+| `/balance` | Balance | AppLayout | Implementado |
+| `/space` | Espacio compartido | AppLayout | Implementado |
+| `/profile` | Mi perfil | AppLayout | Implementado |
 | Cualquier otra ruta | Página no encontrada | SimpleLayout | — |
 
 Los diseños de referencia están en `docs/ux/`. Pendientes de diseño: paso
@@ -74,7 +117,9 @@ Navy `#0B2038`, Mint `#47DDB9` e Ice `#EAF6FA`.
 
 ## Backend (Supabase)
 
-Estado: **Fase 4 completada** (autenticación, espacios e invitaciones). Login, registro,
+Estado: **integración conservada**. En desarrollo el modo predeterminado es mock;
+ningún servicio real de Supabase se usa mientras `VITE_DATA_MODE=mock`. Al
+seleccionar `supabase`, Login, registro,
 recuperación y cambio de contraseña usan Supabase Auth. Las rutas de la app
 y el onboarding exigen sesión (`ProtectedRoute`); login y registro redirigen
 si ya hay sesión (`PublicOnlyRoute`). «Crea tu espacio» llama a la función
@@ -94,7 +139,8 @@ invitación» (`accept_invitation`, idempotente y transaccional).
    `npx supabase migration repair --status applied <versión> --remote`.
 2. Authentication → URL Configuration: Site URL `http://localhost:5173` y
    Redirect URLs `http://localhost:5173/**` y `http://127.0.0.1:5173/**`.
-   Abre la app siempre en `http://localhost:5173` (`npm run dev` ya usa ese origen):
+   Selecciona `VITE_DATA_MODE=supabase` y abre la app en
+   `http://localhost:5173` (`npm run dev` ya usa ese origen):
    con PKCE el enlace del correo solo funciona en el mismo navegador y origen
    donde te registraste. Los enlaces de confirmación llegan a `/auth/callback`,
    que inicia la sesión, gestiona los errores (`otp_expired`…) y permite reenviar
@@ -165,8 +211,8 @@ debe servir `index.html` para rutas de la aplicación como `/expenses` cuando
 se abren directamente o se recargan, sin reescribir los recursos estáticos.
 Vite ya proporciona este comportamiento durante desarrollo y preview.
 
-Todavía no hay service worker, instalación PWA, funcionamiento offline ni
-Playwright.
+Todavía no hay service worker, instalación PWA ni funcionamiento offline.
+Playwright cubre los principales flujos de autenticación y espacios en modo mock.
 
 ## Accessibility First + Testability First
 

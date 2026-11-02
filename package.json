@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:demo": "vite --mode demo",
+    "dev:mock": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
@@ -15,6 +15,10 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:file": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
     "test:db": "vitest run --project db",
     "test:unit": "vitest run --project unit"
   },
@@ -27,6 +31,7 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
     "@types/node": "^24.19.2",

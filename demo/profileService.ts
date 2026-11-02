@@ -1,4 +1,4 @@
-import { demoDelay, demoUserFromId, updateDemoState } from './demoStore'
+import { demoDelay, demoUserFromId, getDemoState, updateDemoState } from './demoStore'
 
 export {
   DISPLAY_NAME_MAX_LENGTH,
@@ -9,6 +9,10 @@ export async function updateDisplayName(userId: string, name: string): Promise<s
   await demoDelay()
   const key = demoUserFromId(userId)
   const displayName = name.trim()
-  updateDemoState((state) => ({ ...state, names: { ...state.names, [key]: displayName } }))
+  const account = getDemoState().users[key]
+  updateDemoState((state) => ({
+    ...state,
+    users: { ...state.users, [key]: { ...account, name: displayName } },
+  }))
   return displayName
 }
