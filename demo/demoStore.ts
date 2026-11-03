@@ -70,12 +70,12 @@ function account(
 
 function initialState(): DemoState {
   const users = [
-    account('nuevo', 'nuevo@duobalance.test', 'Nora Vidal', 'Sin espacio'),
-    account('solo', 'solo@duobalance.test', 'Sergio López', 'Espacio sin pareja'),
-    account('rocio', 'rocio@duobalance.test', 'Rocío Aragonés', 'Pareja completa · creadora'),
-    account('pablo', 'pablo@duobalance.test', 'Pablo Martín', 'Pareja completa · invitado'),
-    account('ines', 'ines@duobalance.test', 'Inés Demo', 'Disponible para invitaciones'),
-    account('mateo', 'mateo@duobalance.test', 'Mateo Demo', 'Disponible para invitaciones'),
+    account('nuevo', 'nuevo@duobalance.test', 'Isabel', 'Sin espacio'),
+    account('solo', 'solo@duobalance.test', 'Juan', 'Espacio sin pareja'),
+    account('rocio', 'rocio@duobalance.test', 'Rocío', 'Pareja completa · creadora'),
+    account('pablo', 'pablo@duobalance.test', 'Pablo', 'Pareja completa · invitado'),
+    account('ines', 'ines@duobalance.test', 'Maria', 'Disponible para invitaciones'),
+    account('mateo', 'mateo@duobalance.test', 'Curro', 'Disponible para invitaciones'),
   ]
 
   return {

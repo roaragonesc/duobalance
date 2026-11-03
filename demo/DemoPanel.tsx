@@ -93,7 +93,7 @@ export function DemoPanel() {
           Contraseña de usuarios de prueba: <code className="font-semibold">{DEMO_PASSWORD}</code>
         </p>
         <p className="mb-2">
-          Rocío y Pablo comparten los movimientos. Las cuentas Inés y Mateo están disponibles para
+          Rocío y Pablo comparten los movimientos. Las cuentas Maria y Curro están disponibles para
           invitaciones.
         </p>
         {pendingConfirmations.length > 0 && (

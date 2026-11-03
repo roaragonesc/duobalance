@@ -13,22 +13,22 @@ export const demoUsers = {
   },
   ines: {
     email: 'ines@duobalance.test',
-    name: 'Inés',
+    name: 'Maria',
     password: demoPassword,
   },
   mateo: {
     email: 'mateo@duobalance.test',
-    name: 'Mateo',
+    name: 'Curro',
     password: demoPassword,
   },
   nuevo: {
     email: 'nuevo@duobalance.test',
-    name: 'Nora',
+    name: 'Isabel',
     password: demoPassword,
   },
   solo: {
     email: 'solo@duobalance.test',
-    name: 'Sergio',
+    name: 'Juan',
     password: demoPassword,
   },
 } as const

@@ -36,8 +36,8 @@ Los helpers de `scenarios` ofrecen:
 
 - `unauthenticated()`: sin sesión.
 - `authenticated('rocio')`: sesión iniciada con una cuenta seed.
-- `withoutSpace()`: Nora, sin espacio, lista para el onboarding.
-- `emptySpace()`: Sergio, con un espacio creado, sin pareja ni movimientos.
+- `withoutSpace()`: Isabel, sin espacio, lista para el onboarding.
+- `emptySpace()`: Juan, con un espacio creado, sin pareja ni movimientos.
 - `spaceWithPartner()`: Rocío y Pablo, con espacio y movimientos compartidos.
 
 Los cambios del panel esperan la recarga real y los escenarios autenticados esperan a que termine el login antes de continuar. No se reutiliza `storageState` entre tests ni se comparte almacenamiento entre workers. Los service workers están bloqueados para que las peticiones del navegador no eludan la guardia de red.
