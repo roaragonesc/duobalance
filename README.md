@@ -48,6 +48,10 @@ datos se guardan en `localStorage` de este navegador; no se sincronizan entre
 dispositivos. Las contraseñas registradas en este modo son solo credenciales
 ficticias de desarrollo.
 
+Los gastos se muestran por fecha, del más reciente al más antiguo, tanto en
+la lista como en los últimos movimientos del dashboard. Si coinciden en fecha,
+aparece primero el último añadido; editarlo no cambia su orden de creación.
+
 La primera vez, instala Chromium para Playwright con
 `npx playwright install chromium`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
 restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
