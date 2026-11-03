@@ -1,6 +1,7 @@
 // Shared demo movements persist in this browser so both demo accounts see them.
 import { currentMonth, shiftMonth, todayIso, type MonthKey } from '../src/lib/month'
 import { isCategoryId } from '../src/features/expenses/categories'
+import { sortExpensesNewestFirst } from '../src/features/expenses/sortExpenses'
 import type { ExpenseCategoryId, ExpenseKind } from '../src/features/expenses/types'
 import type { PendingBalance } from '../src/features/dashboard/types'
 import { getDemoState, isSpaceOwner } from './demoStore'
@@ -222,10 +223,11 @@ export function inMonth(date: string, month: MonthKey) {
 
 /** Individual expenses are private: only their owner sees them. */
 export function visibleExpenses(spaceId: string, month: MonthKey) {
-  return expenses
-    .filter((expense) => expense.spaceId === spaceId && inMonth(expense.date, month))
-    .filter((expense) => expense.kind === 'shared' || expense.by === viewer())
-    .sort((a, b) => b.date.localeCompare(a.date))
+  return sortExpensesNewestFirst(
+    expenses
+      .filter((expense) => expense.spaceId === spaceId && inMonth(expense.date, month))
+      .filter((expense) => expense.kind === 'shared' || expense.by === viewer()),
+  )
 }
 
 export function sum<T extends { amountCents: number }>(items: T[]) {

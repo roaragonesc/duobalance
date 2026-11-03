@@ -2,7 +2,7 @@ import type { MonthKey } from '../src/lib/month'
 import type { DashboardSummary } from '../src/features/dashboard/types'
 import { getCategory } from '../src/features/expenses/categories'
 import { demoDelay, hasSampleData } from './demoStore'
-import { expenses, inMonth, monthDebtOfB, shareOfA, sum, toPending, viewer } from './sampleData'
+import { expenses, inMonth, monthDebtOfB, shareOfA, sum, toPending, viewer, visibleExpenses } from './sampleData'
 import { shiftMonth } from '../src/lib/month'
 
 export async function getDashboardSummary(
@@ -11,9 +11,7 @@ export async function getDashboardSummary(
 ): Promise<DashboardSummary | null> {
   await demoDelay()
   if (!hasSampleData(spaceId)) return null
-  const shared = expenses
-    .filter((e) => e.spaceId === spaceId && e.kind === 'shared' && inMonth(e.date, month))
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const shared = visibleExpenses(spaceId, month).filter((expense) => expense.kind === 'shared')
   if (shared.length === 0) return null
 
   const totalCents = sum(shared)
