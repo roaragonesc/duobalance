@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
-import { inject } from 'vitest'
 
 const TEMPLATE_DB = 'duobalance_template'
 
@@ -13,9 +12,13 @@ export type TestDatabase = {
 }
 
 function config(database: string): pg.PoolConfig {
+  const port = Number(process.env.DUOBALANCE_PG_TEST_PORT)
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new Error('PostgreSQL test port missing; run with playwright.db.config.ts')
+  }
   return {
     host: '127.0.0.1',
-    port: inject('pgPort'),
+    port,
     user: 'postgres',
     password: 'postgres',
     database,
@@ -49,9 +52,12 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     drop: async () => {
       await admin.end()
       const client = new pg.Client(config('postgres'))
-      await client.connect()
-      await client.query(`drop database if exists ${name} with (force)`)
-      await client.end()
+      try {
+        await client.connect()
+        await client.query(`drop database if exists ${name} with (force)`)
+      } finally {
+        await client.end()
+      }
     },
   }
 }

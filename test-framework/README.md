@@ -4,8 +4,8 @@ Todas las pruebas viven en `test-framework/`, separadas del código React en
 `src/` y del servidor en `backend/src/`. No es otro repositorio: es un paquete
 de pruebas claramente delimitado dentro de este monorepositorio.
 Playwright tiene aquí su propio `package.json`, lockfile, dependencias,
-configuraciones y comandos. Vitest reutiliza las dependencias de desarrollo
-de la raíz, pero sus suites, setup y configuración también están aquí.
+configuraciones y comandos. Todas las suites usan Playwright Test: logica,
+componentes React en navegador, PostgreSQL, API y recorridos web.
 `npm run test:e2e` conserva la suite mock. `npm run test:api` valida la API
 con MongoDB efímero y `npm run test:e2e:api` ejecuta `recorridoFinancieroApi.spec.ts` con
 la UI real y dos sesiones independientes contra ese backend, sin Atlas.
@@ -38,10 +38,11 @@ La selección de configuraciones/proyectos es estado local de la extensión:
 no hay un ajuste versionable que permita forzarla desde el repositorio.
 No se ejecutan tests ni se arrancan servidores al listar los casos.
 
-Las unitarias React (76) y PostgreSQL (83) son Vitest, no Playwright.
-Instala la extensión recomendada **Vitest** (`vitest.explorer`) para verlas
-también en el matraz, con los proyectos `unit` y `db` de `vitest.config.ts`.
-Las dependencias deben estar instaladas antes de actualizar la lista.
+Las unitarias React (76) y PostgreSQL (83) tambien usan Playwright.
+Activa sus configuraciones en **Toggle Playwright Configs**, junto con las
+de web y API. No se necesita la extension Vitest. Si conserva el arbol anterior,
+ejecuta **Developer: Reload Window**. Las dependencias deben estar instaladas
+antes de actualizar la lista.
 
 Ejecuta cada suite por separado con sus comandos de abajo. No uses
 **Run All** simultáneamente para API REST y frontend con API: sus servidores
@@ -58,7 +59,7 @@ Los archivos Playwright usan nombres funcionales sin prefijo TC, como
 `loginCorrecto.spec.ts`, `validacionLogin.spec.ts` o `consultarSalud.spec.ts`.
 Los IDs TC pertenecen a los tests interiores, no a los archivos del explorador.
 En `web/` y `api/` hay un caso por archivo, sin subcarpetas.
-Web tiene 23 archivos (TC01–23) y API 58 (TC01–58). En Vitest,
+Web tiene 23 archivos (TC01–23) y API 58 (TC01–58). En unit y db,
 si un archivo contiene varios casos, su nombre resume el grupo.
 No se cambia el nombre de fixtures, Page Objects ni utilidades.
 
@@ -73,12 +74,11 @@ API TC59–106. No hay un contador global compartido entre categorias.
 
 La numeracion es independiente por suite: los IDs E2E conservan su correspondencia
 con el documento de casos, los REST mantienen `TC01_API_...`, y unitarias y
-PostgreSQL numeran sus escenarios por separado. Las variantes de `it.each`
+PostgreSQL numeran sus escenarios por separado. Las variantes parametrizadas
 comparten ID de escenario y terminan en `Caso0`, `Caso1`, etc., para distinguir
 entradas sin incluir SQL, correos o nombres de personas en el titulo.
 
 - `playwright.*.config.ts`: configuraciones API, UI mock, UI API y demo Pages.
-- `vitest.config.ts`: proyectos unitarios y PostgreSQL.
 - `tsconfig.json`: comprobación estricta de tipos del framework.
 - `unit/`: pruebas unitarias React y de lógica, con su setup.
 - `db/`: pruebas históricas PostgreSQL, helpers y arranque local efímero.
@@ -144,8 +144,8 @@ El estado de confirmación solo aparece tras una solicitud válida completada;
 - `npm run test:api`: 58 casos API/seed mediante `APIRequestContext`.
 - `npm run test:e2e:api`: recorrido UI real multiusuario contra API local.
 - `npm run test:fw:typecheck`: tipos de todas las suites y configuraciones.
-- `npm run test:unit`: pruebas unitarias Vitest de `unit/`.
-- `npm run test:db`: pruebas PostgreSQL de Vitest; no se ejecutan al lanzar Playwright.
+- `npm run test:unit`: pruebas de logica y componentes React con Playwright.
+- `npm run test:db`: pruebas PostgreSQL con Playwright y base local efimera; no se ejecutan desde la configuracion E2E mock.
 - `npm run test:e2e`: suite E2E completa.
 - `npm run test:e2e:file -- web/loginCorrecto.spec.ts`: ejecutar un archivo.
 - `npm run test:e2e:ui`: abrir el modo interactivo de Playwright.

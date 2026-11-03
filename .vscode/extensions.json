@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "ms-playwright.playwright",
-    "vitest.explorer"
+    "ms-playwright.playwright"
   ]
 }

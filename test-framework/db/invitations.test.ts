@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { test as it, expect } from './fixtures.ts'
 import {
   asUser,
-  createTestDatabase,
   createUser,
   scalar,
   sql,
@@ -20,15 +19,14 @@ const members = (spaceId: string) =>
     ])
     .then(({ rows }) => rows)
 
-beforeEach(async () => {
-  db = await createTestDatabase()
+it.beforeEach(async ({ database }) => {
+  db = database
   ana = await createUser(db, 'ana@example.test')
   bruno = await createUser(db, 'Bruno@Example.test')
   carla = await createUser(db, 'carla@example.test')
 })
-afterEach(() => db.drop())
 
-describe('create_invitation', () => {
+it.describe('create_invitation', () => {
   it('TC13_devuelveUnTokenAleatorioYSoloGuardaSuHashSHA256', async () => {
     await asUser(db, ana, (tx) => sql.createSpace(tx))
     const token = await asUser(db, ana, (tx) => sql.invite(tx, ' BRUNO@example.test '))
@@ -79,16 +77,15 @@ describe('create_invitation', () => {
     )
   })
 
-  it.each([[null], [''], ['   '], ['no-es-un-correo'], ['a@b'], ['a b@c.es'], [`${'a'.repeat(250)}@x.es`]])(
-    'TC16_rechazaCorreosNoValidosCaso%#',
-    async (email) => {
+  for (const [index, email] of [null, '', '   ', 'no-es-un-correo', 'a@b', 'a b@c.es', `${'a'.repeat(250)}@x.es`].entries()) {
+    it(`TC16_rechazaCorreosNoValidosCaso${index}`, async () => {
       await asUser(db, ana, (tx) => sql.createSpace(tx))
       await expect(asUser(db, ana, (tx) => sql.invite(tx, email))).rejects.toMatchObject({
         code: '22023',
         message: 'invalid_email',
       })
-    },
-  )
+    })
+  }
 
   it('TC17_permiteUnaInvitacionNuevaCuandoLaAnteriorHaCaducado', async () => {
     await asUser(db, ana, (tx) => sql.createSpace(tx))
@@ -128,11 +125,11 @@ describe('create_invitation', () => {
   })
 })
 
-describe('accept_invitation', () => {
+it.describe('accept_invitation', () => {
   let spaceId: string
   let token: string
 
-  beforeEach(async () => {
+  it.beforeEach(async () => {
     spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx))
     token = await asUser(db, ana, (tx) => sql.invite(tx, 'bruno@example.test'))
   })
@@ -150,14 +147,13 @@ describe('accept_invitation', () => {
     expect(rows).toEqual([{ accepted_by: bruno }])
   })
 
-  it.each([[null], [''], ['x'.repeat(64)], ['a'.repeat(10_000)]])(
-    'TC21_rechazaTokensFalsosCaso%#',
-    async (fake) => {
+  for (const [index, fake] of [null, '', 'x'.repeat(64), 'a'.repeat(10_000)].entries()) {
+    it(`TC21_rechazaTokensFalsosCaso${index}`, async () => {
       await expect(asUser(db, bruno, (tx) => sql.accept(tx, fake))).rejects.toThrow(
         'invalid_invitation',
       )
-    },
-  )
+    })
+  }
 
   it('TC22_rechazaUnTokenConUnCaracterCambiado', async () => {
     const forged = token.slice(0, -1) + (token.endsWith('0') ? '1' : '0')
@@ -234,21 +230,23 @@ describe('accept_invitation', () => {
   })
 })
 
-describe('RLS de space_invitations', () => {
-  it.each([
+it.describe('RLS de space_invitations', () => {
+  for (const [index, [statement]] of [
     ['select * from public.space_invitations'],
     ["update public.space_invitations set expires_at = now() + interval '1 year'"],
     ['delete from public.space_invitations'],
     [
       "insert into public.space_invitations (space_id, invited_email, token_hash, created_by) values (gen_random_uuid(), 'x@y.es', '\\x00', gen_random_uuid())",
     ],
-  ])('TC32_deniegaAccesoDirectoCaso%#', async (statement) => {
+  ].entries()) {
+    it(`TC32_deniegaAccesoDirectoCaso${index}`, async () => {
     await asUser(db, ana, (tx) => sql.createSpace(tx))
     await asUser(db, ana, (tx) => sql.invite(tx, 'bruno@example.test'))
     for (const user of [ana, bruno, null]) {
       await expect(asUser(db, user, (tx) => tx.query(statement))).rejects.toMatchObject({
         code: '42501',
-      })
+        })
+      }
     }
   })
 

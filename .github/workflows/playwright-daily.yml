@@ -89,11 +89,14 @@ jobs:
       - name: Ejecutar lint
         run: npm run lint
 
-      - name: Ejecutar pruebas unitarias
-        run: npm run test:unit -- --maxWorkers=1
-
       - name: Instalar Chromium y dependencias del sistema
         run: npm --prefix test-framework exec -- playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas unitarias y de componentes con Playwright
+        run: npm run test:unit -- --workers=1
+
+      - name: Ejecutar pruebas PostgreSQL con Playwright
+        run: npm run test:db
 
       - name: Ejecutar E2E con servidor mock aislado
         run: npm run test:e2e -- --workers=2 --fail-on-flaky-tests

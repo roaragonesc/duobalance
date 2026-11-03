@@ -275,7 +275,7 @@ invitación» (`accept_invitation`, idempotente y transaccional).
    con PKCE el enlace del correo solo funciona en el mismo navegador y origen
    donde te registraste. Los enlaces de confirmación llegan a `/auth/callback`,
    que inicia la sesión, gestiona los errores (`otp_expired`…) y permite reenviar
-   el correo. `npm run test:unit` prueba este flujo con Vitest y jsdom.
+   el correo. `npm run test:unit` prueba este flujo con Playwright en navegador.
 3. Authentication → Providers → Email: mínimo 8 caracteres con minúsculas,
    mayúsculas y números; confirmación de correo activada.
 4. Probar el registro con el correo de la cuenta de Supabase (el SMTP

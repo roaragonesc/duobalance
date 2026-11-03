@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { test as it, expect } from './fixtures.ts'
 import {
   beginAs,
-  createTestDatabase,
   createUser,
   asUser,
   scalar,
@@ -60,8 +59,8 @@ async function race<T1, T2>(
   return { result1, result2: await pending }
 }
 
-beforeEach(async () => {
-  db = await createTestDatabase()
+it.beforeEach(async ({ database }) => {
+  db = database
   ana = await createUser(db, 'ana@example.test')
   bruno = await createUser(db, 'bruno@example.test')
   carla = await createUser(db, 'carla@example.test')
@@ -69,15 +68,20 @@ beforeEach(async () => {
   second = await db.connect()
 })
 
-afterEach(async () => {
-  first.release()
-  second.release()
-  await db.drop()
+it.afterEach(async () => {
+  for (const client of [first, second]) {
+    if (!client) continue
+    try {
+      await client.query('rollback')
+    } finally {
+      client.release()
+    }
+  }
 })
 
 const memberCount = () => scalar<number>(db.admin, 'select count(*)::int from public.space_members')
 
-describe('concurrencia', () => {
+it.describe('concurrencia', () => {
   it('TC01_dosCreateSpaceSimultaneosDelMismoUsuarioUnoGanaSinEspaciosHuerfanos', async () => {
     const { result2 } = await race(
       { user: ana, run: (tx) => sql.createSpace(tx, 'A') },

@@ -35,3 +35,4 @@ coverage/
 *.log
 backend/.local-mail/
 backend/dist/
+test-framework/db/.postgres-*/

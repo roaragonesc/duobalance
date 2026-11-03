@@ -1,15 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createTestDatabase, type TestDatabase } from './testDatabase.ts'
+import { test as it, expect } from './fixtures.ts'
+import type { TestDatabase } from './testDatabase.ts'
 
 let db: TestDatabase
-beforeEach(async () => {
-  db = await createTestDatabase()
+it.beforeEach(async ({ database }) => {
+  db = database
 })
-afterEach(() => db.drop())
 
 const TABLES = ['profiles', 'spaces', 'space_members', 'space_invitations']
 
-describe('integridad del esquema', () => {
+it.describe('integridad del esquema', () => {
   it('TC08_lasMigracionesCreanTodasLasTablasConRLSActivado', async () => {
     const { rows } = await db.admin.query(
       `select relname, relrowsecurity from pg_class

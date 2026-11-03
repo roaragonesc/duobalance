@@ -1,13 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { asUser, createTestDatabase, createUser, sql, type TestDatabase } from './testDatabase.ts'
+import { test as it, expect } from './fixtures.ts'
+import { asUser, createUser, sql, type TestDatabase } from './testDatabase.ts'
 
 let db: TestDatabase
-beforeEach(async () => {
-  db = await createTestDatabase()
+it.beforeEach(async ({ database }) => {
+  db = database
 })
-afterEach(() => db.drop())
 
-describe('profiles', () => {
+it.describe('profiles', () => {
   it('TC34_creaElPerfilAlRegistrarseConElNombreOElPrefijoDelCorreo', async () => {
     const { rows } = await db.admin.query<{ id: string }>(
       `insert into auth.users (email, raw_user_meta_data)
@@ -43,17 +42,19 @@ describe('profiles', () => {
     expect(rows).toEqual([{ display_name: 'Ana B.', touched: true }])
   })
 
-  it.each([
+  for (const [index, [statement]] of [
     ['update public.profiles set id = gen_random_uuid()'],
     ['update public.profiles set created_at = now()'],
     ["insert into public.profiles (id, display_name) values (gen_random_uuid(), 'X')"],
     ['delete from public.profiles'],
-  ])('TC36_denegarCambiosNoPermitidosEnPerfilesCaso%#', async (statement) => {
-    const ana = await createUser(db, 'ana@example.test')
-    await expect(asUser(db, ana, (tx) => tx.query(statement))).rejects.toMatchObject({
-      code: '42501',
+  ].entries()) {
+    it(`TC36_denegarCambiosNoPermitidosEnPerfilesCaso${index}`, async () => {
+      const ana = await createUser(db, 'ana@example.test')
+      await expect(asUser(db, ana, (tx) => tx.query(statement))).rejects.toMatchObject({
+        code: '42501',
+      })
     })
-  })
+  }
 
   it('TC37_validaLaLongitudDelNombre', async () => {
     const ana = await createUser(db, 'ana@example.test')

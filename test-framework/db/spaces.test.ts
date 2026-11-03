@@ -1,7 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { test as it, expect } from './fixtures.ts'
 import {
   asUser,
-  createTestDatabase,
   createUser,
   scalar,
   sql,
@@ -22,15 +21,14 @@ const addMember = (spaceId: string, userId: string) =>
     [spaceId, userId],
   )
 
-beforeEach(async () => {
-  db = await createTestDatabase()
+it.beforeEach(async ({ database }) => {
+  db = database
   ana = await createUser(db, 'ana@example.test')
   bruno = await createUser(db, 'bruno@example.test')
   carla = await createUser(db, 'carla@example.test')
 })
-afterEach(() => db.drop())
 
-describe('create_space', () => {
+it.describe('create_space', () => {
   it('TC42_creaElEspacioYElOwnerEnUnaTransaccion', async () => {
     const spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx, '  Casa  '))
     const visible = await asUser(db, ana, async (tx) => ({
@@ -68,24 +66,26 @@ describe('create_space', () => {
     expect(await count('spaces')).toBe(1)
   })
 
-  it.each([
+  for (const [index, [name, split]] of [
     ['   ', 'equal'],
     ['x'.repeat(61), 'equal'],
     [null, 'equal'],
     ['Casa', 'thirds'],
     ['Casa', null],
-  ])('TC45_validaDatosSinDejarNadaAMediasCaso%#', async (name, split) => {
-    await expect(
-      asUser(db, ana, (tx) =>
-        tx.query('select public.create_space($1, $2)', [name, split]),
-      ),
-    ).rejects.toMatchObject({ code: expect.stringMatching(/^23/) })
-    expect(await count('spaces')).toBe(0)
-    expect(await count('space_members')).toBe(0)
-  })
+  ].entries()) {
+    it(`TC45_validaDatosSinDejarNadaAMediasCaso${index}`, async () => {
+      await expect(
+        asUser(db, ana, (tx) =>
+          tx.query('select public.create_space($1, $2)', [name, split]),
+        ),
+      ).rejects.toMatchObject({ code: expect.stringMatching(/^23/) })
+      expect(await count('spaces')).toBe(0)
+      expect(await count('space_members')).toBe(0)
+    })
+  }
 })
 
-describe('restricciones', () => {
+it.describe('restricciones', () => {
   it('TC46_maximoDosMiembrosPorEspacio', async () => {
     const spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx))
     await addMember(spaceId, bruno)
@@ -123,7 +123,7 @@ describe('restricciones', () => {
   })
 })
 
-describe('RLS', () => {
+it.describe('RLS', () => {
   it('TC50_ocultaEspaciosYMiembrosAjenos', async () => {
     const spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx))
     const seen = await asUser(db, bruno, async (tx) => ({
@@ -147,19 +147,21 @@ describe('RLS', () => {
     ])
   })
 
-  it.each([
+  for (const [index, [statement]] of [
     ["insert into public.spaces (name, split_method) values ('X', 'equal')"],
     ["update public.spaces set name = 'X'"],
     ["update public.spaces set split_method = 'proportional'"],
     ['delete from public.spaces'],
     ['delete from public.space_members'],
     ["update public.space_members set role = 'owner'"],
-  ])('TC52_deniegaEscrituraDirectaCaso%#', async (statement) => {
-    await asUser(db, ana, (tx) => sql.createSpace(tx))
-    await expect(asUser(db, ana, (tx) => tx.query(statement))).rejects.toMatchObject({
-      code: '42501',
+  ].entries()) {
+    it(`TC52_deniegaEscrituraDirectaCaso${index}`, async () => {
+      await asUser(db, ana, (tx) => sql.createSpace(tx))
+      await expect(asUser(db, ana, (tx) => tx.query(statement))).rejects.toMatchObject({
+        code: '42501',
+      })
     })
-  })
+  }
 
   it('TC53_deniegaAnadirseAUnEspacioAjeno', async () => {
     const spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx))
@@ -173,15 +175,17 @@ describe('RLS', () => {
     ).rejects.toMatchObject({ code: '42501' })
   })
 
-  it.each([
+  for (const [index, [statement]] of [
     ['select * from public.spaces'],
     ['select * from public.space_members'],
     ['select public.is_space_member(gen_random_uuid())'],
-  ])('TC54_denegarAccesoAnonimoAEspaciosYMiembrosCaso%#', async (statement) => {
-    await expect(asUser(db, null, (tx) => tx.query(statement))).rejects.toMatchObject({
-      code: '42501',
+  ].entries()) {
+    it(`TC54_denegarAccesoAnonimoAEspaciosYMiembrosCaso${index}`, async () => {
+      await expect(asUser(db, null, (tx) => tx.query(statement))).rejects.toMatchObject({
+        code: '42501',
+      })
     })
-  })
+  }
 
   it('TC55_lasFuncionesInternasNoSePuedenInvocarComoRPC', async () => {
     await expect(
@@ -190,7 +194,7 @@ describe('RLS', () => {
   })
 })
 
-describe('borrado de cuentas (casos documentados)', () => {
+it.describe('borrado de cuentas (casos documentados)', () => {
   it('TC56_siSeBorraElOwnerElMiembroSigueEnUnEspacioSinOwner', async () => {
     const spaceId = await asUser(db, ana, (tx) => sql.createSpace(tx))
     await addMember(spaceId, bruno)
