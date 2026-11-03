@@ -52,6 +52,67 @@ La primera vez, instala Chromium para Playwright con
 `npx playwright install chromium`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
 restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
 
+## Integración continua E2E
+
+El workflow [Playwright E2E](.github/workflows/playwright-daily.yml) se ejecuta:
+
+- Todos los días a las **03:00, hora peninsular española**.
+- Al abrir, reabrir o actualizar un Pull Request dirigido a **`master`**, la
+  rama predeterminada del repositorio.
+- Manualmente desde **Actions → Playwright E2E → Run workflow**, seleccionando
+  la rama y confirmando **Run workflow**.
+
+La programación usa `cron: '0 3 * * *'` con `timezone: Europe/Madrid`, admitido
+por la [sintaxis actual de GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule).
+GitHub aplica los cambios de horario: 02:00 UTC en invierno y 01:00 UTC en
+verano, incluidas las fechas de transición. No basta con definir `TZ` en el
+runner para cambiar la hora del disparador.
+
+El workflow debe estar integrado en `master` para habilitar la programación y
+el lanzamiento manual. Los eventos programados usan el último commit de esa
+rama. GitHub no garantiza puntualidad: puede retrasar o descartar ejecuciones
+con mucha carga, especialmente al inicio de cada hora. En repositorios públicos,
+los workflows programados se deshabilitan tras 60 días sin actividad.
+
+El job usa Ubuntu, Node.js 22 y `npm ci`; comprueba TypeScript (incluidos los
+tests) y el build mediante `npm run build`, ejecuta lint y pruebas unitarias,
+e instala Chromium con sus dependencias del sistema. El build de producción
+no se sirve ni se conecta a Supabase: se compila con `VITE_DATA_MODE=supabase`
+porque el build prohíbe empaquetar mocks. No necesita secretos ni credenciales.
+
+Para los E2E, Playwright arranca y detiene su propio Vite en
+`http://127.0.0.1:4174`, exclusivamente con `VITE_DATA_MODE=mock` y
+`VITE_MOCK_SHARED=1`, sin reutilizar servidores existentes. Cada test tiene un
+escenario aislado; los dos BrowserContexts de pareja comparten los datos de
+negocio mediante la cookie de escenario, pero mantienen sesiones independientes.
+La guardia de red bloquea peticiones externas y a Supabase en ambos contextos.
+
+Se ejecutan todos los specs de `tests/e2e/` con dos workers. Un fallo activo
+hace fallar el job, incluso si pasa en el reintento (`--fail-on-flaky-tests`);
+se conserva el reintento para capturar la traza de diagnóstico. Los casos
+pendientes deben seguir marcados con `test.fixme()`: se muestran como omitidos,
+**no como superados**. Actualmente los 20 tests existentes están activos.
+Esta suite no valida API, RLS ni Supabase real.
+
+### Consultar resultados y descargar informes
+
+1. Abre **Actions → Playwright E2E** y selecciona la ejecución (o el check del PR).
+2. Consulta el job **Chromium con datos mock** y el paso E2E para ver los tests
+   superados, fallidos y omitidos; un job que falla antes de E2E no certifica tests.
+3. En **Artifacts**, descarga `playwright-results-<run_id>-<run_attempt>` y
+   extrae el ZIP. Se conserva durante **14 días**, también si fallan las pruebas.
+4. Desde la raíz del proyecto, abre el HTML descargado con
+   `npx playwright show-report "<carpeta extraída>/playwright-report"`.
+   Conserva la carpeta completa, incluidos sus adjuntos.
+5. El ZIP también incluye `test-results/junit.xml` y las capturas/traces en
+   `test-results/artifacts/` cuando se generan. Para abrir una traza:
+   `npx playwright show-trace "<ruta al trace.zip>"`.
+
+El paso de subida se ejecuta con `always()`. Si la instalación o el build falla
+antes de ejecutar Playwright, puede no haber informes; GitHub mostrará el aviso
+correspondiente, sin ocultar el error original. Una cancelación forzada o un fallo
+del runner también puede impedir subir los artifacts.
+
 ## Arquitectura
 
 ### Demo estática en GitHub Pages

@@ -1,0 +1,68 @@
+name: Playwright E2E
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+      timezone: Europe/Madrid
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-e2e-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  e2e:
+    name: Chromium con datos mock
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Comprobar TypeScript y build de producción
+        run: npm run build
+        env:
+          VITE_DATA_MODE: supabase
+
+      - name: Ejecutar lint
+        run: npm run lint
+
+      - name: Ejecutar pruebas unitarias
+        run: npm run test:unit -- --maxWorkers=1
+
+      - name: Instalar Chromium y dependencias del sistema
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar E2E con servidor mock aislado
+        run: npm run test:e2e -- --workers=2 --fail-on-flaky-tests
+        env:
+          VITE_DATA_MODE: mock
+          VITE_MOCK_SHARED: '1'
+
+      - name: Guardar informes, capturas y traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/junit.xml
+            test-results/artifacts/
+          retention-days: 14
+          if-no-files-found: warn
