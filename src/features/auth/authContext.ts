@@ -3,7 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 
 export type AuthState =
   | { status: 'loading' }
-  | { status: 'authenticated'; session: Session }
+  | { status: 'authenticated'; session: Pick<Session, 'user'> }
   | { status: 'unauthenticated' }
 
 export const AuthContext = createContext<AuthState | null>(null)

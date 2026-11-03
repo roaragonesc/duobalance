@@ -1,0 +1,36 @@
+import { expect, test } from '../fixtures/pagesDemo'
+import { RegisterPage } from '../pages/RegisterPage'
+
+test('TC22_confirmarYRecuperarUnaCuentaEnLaDemoEstatica', async ({ page }) => {
+  const email = 'pages@example.test'
+  await page.goto('./#/register')
+  await page.getByRole('button', { name: 'Ocultar panel mock' }).click()
+  await new RegisterPage(page).register({ name: 'Demo Pages', email, password: 'Pruebas1234!' })
+  await page.getByRole('button', { name: 'Mostrar panel mock' }).click()
+  const confirmation = page.getByRole('link', { name: `Confirmar correo de ${email}` })
+  await expect(confirmation).toHaveAttribute('href', /\/duobalance\/#\/auth\/callback\?token_hash=/)
+  await confirmation.click()
+  await page.getByRole('button', { name: 'Ocultar panel mock' }).click()
+  await page.getByRole('button', { name: 'Confirmar mi correo' }).click()
+  await expect(page).toHaveURL(/\/duobalance\/#\/onboarding$/)
+  await page.getByRole('button', { name: 'Mostrar panel mock' }).click()
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByLabel('Usuario de prueba').selectOption(''),
+  ])
+  await expect(page).toHaveURL(/\/duobalance\/#\/login$/)
+  await page.getByRole('button', { name: 'Ocultar panel mock' }).click()
+  await page.getByRole('link', { name: 'Recuperar contraseña' }).click()
+  await expect(page.getByRole('heading', { name: '¿Has olvidado tu contraseña?' })).toBeVisible()
+  await page.getByLabel('Correo electrónico').fill(email)
+  await expect(page.getByLabel('Correo electrónico')).toHaveValue(email)
+  await page.getByRole('button', { name: 'Enviar enlace' }).click()
+  await expect(page.getByRole('status')).toContainText('Si existe una cuenta con ese correo')
+  await page.getByRole('button', { name: 'Mostrar panel mock' }).click()
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByRole('button', { name: `Abrir recuperación de ${email}` }).click(),
+  ])
+  await expect(page).toHaveURL(/\/duobalance\/#\/reset-password\?mock_token=/)
+  await expect(page.getByLabel('Nueva contraseña', { exact: true })).toBeVisible()
+})

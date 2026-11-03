@@ -7,6 +7,7 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 ## Desarrollo
 
 - `npm install`: instalar las dependencias del proyecto.
+- `npm --prefix test-framework ci`: instalar el framework de pruebas separado.
 - `npm run dev`: iniciar Vite en modo mock (sin llamadas a Supabase).
 - `npm run dev:mock`: alias explícito del modo mock.
 - `npm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
@@ -23,13 +24,13 @@ El modo de desarrollo se configura con `VITE_DATA_MODE`:
 - `mock` (predeterminado): sustituye el proveedor de autenticación y todos los
   servicios de datos por mocks locales. No inicia el cliente de Supabase ni
   realiza peticiones a Auth, PostgREST o RPC.
-- `supabase`: usa los servicios reales. Requiere `VITE_SUPABASE_URL` y
-  `VITE_SUPABASE_PUBLISHABLE_KEY` en `.env.local`.
+- `api`: usa el backend Express/MongoDB con cookies HttpOnly. Requiere iniciar
+  el backend y cargar sus datos seed según [backend/README.md](backend/README.md).
 
-Para volver temporalmente a Supabase, cambia `VITE_DATA_MODE=supabase` en
-`.env.local` y reinicia Vite. También puedes definir esa variable antes de
-`npm run dev`. Para compilar producción, el modo debe ser `supabase`; Vite
-rechaza explícitamente una compilación configurada con `mock`.
+Para usar el backend, define `VITE_DATA_MODE=api` y reinicia Vite. El build normal
+usa API por defecto y rechaza empaquetar el modo mock. Supabase se conserva como
+código histórico, pero ya no es un modo de ejecución válido.
+La URI MongoDB solo se configura en `backend/.env`, nunca como variable `VITE_`.
 
 Las cuentas seed del modo mock (contraseña común `Demo1234!`) son:
 
@@ -52,8 +53,16 @@ Los gastos se muestran por fecha, del más reciente al más antiguo, tanto en
 la lista como en los últimos movimientos del dashboard. Si coinciden en fecha,
 aparece primero el último añadido; editarlo no cambia su orden de creación.
 
+Todas las pruebas, fixtures, Page Objects y configuraciones están agrupadas en
+[test-framework/](test-framework/README.md), fuera de `src/` y `backend/`.
+Tiene su propio paquete y lockfile para Playwright; los scripts de la raíz
+delegan las suites en ese directorio. Las unitarias y pruebas PostgreSQL también
+se han trasladado allí, sin cambiar sus casos.
+Los casos REST usan `TC01_API_nombreDelTest`: TC01–45 cubren una operación HTTP
+cada uno; TC46–58 conservan las regresiones de permisos, privacidad y seed.
+
 La primera vez, instala Chromium para Playwright con
-`npx playwright install chromium`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
+`npm --prefix test-framework run browsers`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
 restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
 
 ## Integración continua E2E
@@ -78,10 +87,11 @@ rama. GitHub no garantiza puntualidad: puede retrasar o descartar ejecuciones
 con mucha carga, especialmente al inicio de cada hora. En repositorios públicos,
 los workflows programados se deshabilitan tras 60 días sin actividad.
 
-El job usa Ubuntu, Node.js 22 y `npm ci`; comprueba TypeScript (incluidos los
-tests) y el build mediante `npm run build`, ejecuta lint y pruebas unitarias,
+El workflow usa Ubuntu, Node.js 22 y `npm ci`; comprueba TypeScript de la aplicación
+y el build mediante `npm run build`, los tipos del framework mediante
+`npm run test:fw:typecheck`, ejecuta lint y pruebas unitarias,
 e instala Chromium con sus dependencias del sistema. El build de producción
-no se sirve ni se conecta a Supabase: se compila con `VITE_DATA_MODE=supabase`
+no se sirve ni se conecta a Supabase: se compila con `VITE_DATA_MODE=api`
 porque el build prohíbe empaquetar mocks. No necesita secretos ni credenciales.
 
 Para los E2E, Playwright arranca y detiene su propio Vite en
@@ -91,12 +101,18 @@ escenario aislado; los dos BrowserContexts de pareja comparten los datos de
 negocio mediante la cookie de escenario, pero mantienen sesiones independientes.
 La guardia de red bloquea peticiones externas y a Supabase en ambos contextos.
 
-Se ejecutan todos los specs de `tests/e2e/` con dos workers. Un fallo activo
+Se ejecutan todos los specs mock de `test-framework/web/` con dos workers. Un fallo activo
 hace fallar el job, incluso si pasa en el reintento (`--fail-on-flaky-tests`);
 se conserva el reintento para capturar la traza de diagnóstico. Los casos
 pendientes deben seguir marcados con `test.fixme()`: se muestran como omitidos,
 **no como superados**. Actualmente los 20 tests existentes están activos.
-Esta suite no valida API, RLS ni Supabase real.
+Esta suite mock no valida API, RLS ni Supabase real. Un job independiente ejecuta
+`npm run test:api` y `npm run test:e2e:api` con MongoDB efímero local, sin Atlas,
+y publica sus artifacts HTML/JUnit/capturas/traces separados, sin buzones.
+La suite API se distribuye en cuatro lotes secuenciales, cada uno con servidor
+y base efímeros nuevos, para no agotar el límite de autenticaciones durante
+la preparación de cuentas aisladas. Los informes se unen al terminar y cualquier
+fallo de un lote hace fallar el comando y el job.
 
 ### Consultar resultados y descargar informes
 
@@ -106,11 +122,11 @@ Esta suite no valida API, RLS ni Supabase real.
 3. En **Artifacts**, descarga `playwright-results-<run_id>-<run_attempt>` y
    extrae el ZIP. Se conserva durante **14 días**, también si fallan las pruebas.
 4. Desde la raíz del proyecto, abre el HTML descargado con
-   `npx playwright show-report "<carpeta extraída>/playwright-report"`.
+   `npm --prefix test-framework exec -- playwright show-report "<carpeta extraída>/playwright-report/mock"`.
    Conserva la carpeta completa, incluidos sus adjuntos.
 5. El ZIP también incluye `test-results/junit.xml` y las capturas/traces en
    `test-results/artifacts/` cuando se generan. Para abrir una traza:
-   `npx playwright show-trace "<ruta al trace.zip>"`.
+   `npm --prefix test-framework exec -- playwright show-trace "<ruta al trace.zip>"`.
 
 El paso de subida se ejecuta con `always()`. Si la instalación o el build falla
 antes de ejecutar Playwright, puede no haber informes; GitHub mostrará el aviso
@@ -118,6 +134,17 @@ correspondiente, sin ocultar el error original. Una cancelación forzada o un fa
 del runner también puede impedir subir los artifacts.
 
 ## Arquitectura
+
+### Backend propio con MongoDB
+
+La implementación modular y su estado real están en
+[backend/README.md](backend/README.md): inventario, mapa de endpoints,
+OpenAPI, configuración privada y ejecución local.
+Incluye autenticación, perfiles, espacios, invitaciones, categorías, gastos,
+ingresos, balances y liquidaciones, seed idempotente y adaptadores React API.
+Los mocks y las migraciones existentes se conservan. La conexión/carga Atlas
+no se presupone: requiere `backend/.env` guardado y verificación real.
+No definir una URI MongoDB como variable `VITE_` ni compartir sus credenciales.
 
 ### Demo estática en GitHub Pages
 
@@ -166,7 +193,12 @@ src/
   routes/               Router y catálogo de navegación de la aplicación
   types/                Reservada para tipos compartidos
 demo/                   Adaptadores mock solo para desarrollo
-tests/e2e/              Flujos E2E independientes con Playwright
+test-framework/         Todas las suites y configuraciones de pruebas
+  api/                  REST mediante Playwright APIRequestContext
+  web/                  Flujos UI mock, API real y demo, sin subcarpetas
+  unit/                 Unitarias React y lógica
+  db/                   PostgreSQL histórico
+  integration/          MongoDB efímero y seed
 ```
 
 `App.tsx` monta el router y el enlace accesible para saltar al contenido.
@@ -210,9 +242,13 @@ en móvil. `NavLink` marca la ruta activa con `aria-current="page"`.
 Se conservan el plugin de Tailwind v4 y los colores definidos en `src/index.css`:
 Navy `#0B2038`, Mint `#47DDB9` e Ice `#EAF6FA`.
 
-## Backend (Supabase)
+## Backend histórico (Supabase)
 
-Estado: **integración conservada**. En desarrollo el modo predeterminado es mock;
+Esta sección conserva documentación de la implementación anterior y **no es
+la guía de arranque actual**: `VITE_DATA_MODE=supabase` ya no se admite.
+Para arrancar MongoDB/API, usar [backend/README.md](backend/README.md).
+
+Estado histórico: **integración conservada**. En desarrollo el modo predeterminado es mock;
 ningún servicio real de Supabase se usa mientras `VITE_DATA_MODE=mock`. Al
 seleccionar `supabase`, Login, registro,
 recuperación y cambio de contraseña usan Supabase Auth. Las rutas de la app

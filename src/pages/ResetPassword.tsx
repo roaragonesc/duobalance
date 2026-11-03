@@ -39,6 +39,8 @@ export default function ResetPassword() {
   const [linkFailed] = useState(() =>
     hasAuthLinkError(window.location.search, window.location.hash),
   )
+  const apiRecovery = import.meta.env.VITE_DATA_MODE === 'api' &&
+    /^[a-f0-9]{64}$/.test(new URLSearchParams(window.location.search).get('token') ?? '')
   const { values, errors, formError, isSubmitting, setValue, handleSubmit } =
     useValidatedForm({
       initialValues,
@@ -65,7 +67,7 @@ export default function ResetPassword() {
     )
   }
 
-  if (linkFailed || auth.status === 'unauthenticated') {
+  if (linkFailed || (auth.status === 'unauthenticated' && !apiRecovery)) {
     return (
       <AuthLightCard
         title="Enlace no válido"

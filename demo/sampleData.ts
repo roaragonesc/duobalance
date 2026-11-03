@@ -6,6 +6,7 @@ import type { ExpenseCategoryId, ExpenseKind } from '../src/features/expenses/ty
 import type { PendingBalance } from '../src/features/dashboard/types'
 import { getDemoState, isSpaceOwner } from './demoStore'
 import { persistSharedMock, registerSharedResource } from './sharedClient'
+import mockData from '../shared/mockData.json'
 
 /** A = creator of the space (Rocío), B = invited partner (Pablo). */
 type Person = 'A' | 'B'
@@ -39,21 +40,17 @@ export type SampleSettlement = {
   by: Person
 }
 
-const expenseSeed: Omit<SampleExpense, 'id' | 'date' | 'spaceId'>[] = [
-  { description: 'Alquiler', amountCents: 55000, categoryId: 'housing', kind: 'shared', by: 'B' },
-  { description: 'Supermercado', amountCents: 5680, categoryId: 'food', kind: 'shared', by: 'A' },
-  { description: 'Gasolina', amountCents: 4500, categoryId: 'transport', kind: 'shared', by: 'A' },
-  { description: 'Internet y móvil', amountCents: 3000, categoryId: 'utilities', kind: 'shared', by: 'B' },
-  { description: 'Cena fuera', amountCents: 2400, categoryId: 'leisure', kind: 'shared', by: 'A' },
-  { description: 'Gimnasio', amountCents: 3500, categoryId: 'health', kind: 'individual', by: 'A' },
-  { description: 'Peluquería', amountCents: 1800, categoryId: 'other', kind: 'individual', by: 'B' },
-]
+const expenseSeed = mockData.expenses.map((expense): Omit<SampleExpense, 'id' | 'date' | 'spaceId'> => {
+  if (!isCategoryId(expense.categoryId) ||
+      (expense.kind !== 'shared' && expense.kind !== 'individual') ||
+      (expense.by !== 'A' && expense.by !== 'B')) throw new Error('Gasto seed no válido.')
+  return { ...expense, categoryId: expense.categoryId, kind: expense.kind, by: expense.by }
+})
 
-const incomeSeed: Omit<SampleIncome, 'id' | 'date' | 'spaceId'>[] = [
-  { description: 'Nómina', amountCents: 210000, by: 'A' },
-  { description: 'Nómina', amountCents: 140000, by: 'B' },
-  { description: 'Venta de segunda mano', amountCents: 4500, by: 'A' },
-]
+const incomeSeed = mockData.incomes.map((income): Omit<SampleIncome, 'id' | 'date' | 'spaceId'> => {
+  if (income.by !== 'A' && income.by !== 'B') throw new Error('Ingreso seed no válido.')
+  return { ...income, by: income.by }
+})
 
 // Dates never fall in the future: the current month only uses past days.
 function dateIn(month: MonthKey, index: number) {

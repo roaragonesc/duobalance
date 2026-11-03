@@ -33,3 +33,5 @@ playwright-report/
 test-results/
 coverage/
 *.log
+backend/.local-mail/
+backend/dist/

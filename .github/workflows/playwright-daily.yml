@@ -16,6 +16,46 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  backend-api:
+    name: API y UI con MongoDB aislado
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            test-framework/package-lock.json
+      - run: npm ci
+      - run: npm --prefix backend ci
+      - run: npm --prefix test-framework ci
+      - run: npm run test:fw:typecheck
+      - run: npm run backend:build
+      - run: npm run backend:lint
+      - name: Probar API financiera, autenticación y seed
+        run: npm run test:api
+      - run: npm --prefix test-framework exec -- playwright install --with-deps chromium
+      - name: Recorrido multiusuario UI con API y MongoDB aislado
+        run: npm run test:e2e:api
+      - name: Guardar informes API sin buzón de correo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/api/
+            test-results/api/junit.xml
+            test-results/api/artifacts/
+            playwright-report/api-e2e/
+            test-results/api-e2e/junit.xml
+            test-results/api-e2e/artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+
   e2e:
     name: Chromium con datos mock
     runs-on: ubuntu-latest
@@ -31,14 +71,20 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            test-framework/package-lock.json
 
       - name: Instalar dependencias
-        run: npm ci
+        run: |
+          npm ci
+          npm --prefix test-framework ci
+          npm --prefix backend ci
 
       - name: Comprobar TypeScript y build de producción
         run: npm run build
         env:
-          VITE_DATA_MODE: supabase
+          VITE_DATA_MODE: api
 
       - name: Ejecutar lint
         run: npm run lint
@@ -47,7 +93,7 @@ jobs:
         run: npm run test:unit -- --maxWorkers=1
 
       - name: Instalar Chromium y dependencias del sistema
-        run: npx playwright install --with-deps chromium
+        run: npm --prefix test-framework exec -- playwright install --with-deps chromium
 
       - name: Ejecutar E2E con servidor mock aislado
         run: npm run test:e2e -- --workers=2 --fail-on-flaky-tests

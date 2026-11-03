@@ -4,6 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:build": "npm --prefix backend run build",
+    "backend:lint": "npm --prefix backend run lint",
+    "test:api": "npm --prefix test-framework run test:api --",
+    "test:e2e:api": "npm --prefix test-framework run test:e2e:api --",
+    "test:fw:typecheck": "npm --prefix test-framework run typecheck",
     "dev": "vite",
     "dev:mock": "vite",
     "dev:demo": "vite --mode demo",
@@ -17,14 +23,14 @@
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "test:demo": "npm run build:demo && playwright test --config playwright.demo.config.ts",
-    "test:e2e:file": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug",
-    "test:db": "vitest run --project db",
-    "test:unit": "vitest run --project unit"
+    "test": "npm --prefix test-framework test --",
+    "test:e2e": "npm --prefix test-framework run test:e2e --",
+    "test:demo": "npm run build:demo && npm --prefix test-framework run test:demo",
+    "test:e2e:file": "npm --prefix test-framework run test:e2e --",
+    "test:e2e:ui": "npm --prefix test-framework run test:e2e -- --ui",
+    "test:e2e:debug": "npm --prefix test-framework run test:e2e -- --debug",
+    "test:db": "npm --prefix test-framework run test:db --",
+    "test:unit": "npm --prefix test-framework run test:unit --"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
@@ -35,7 +41,6 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
     "@types/node": "^24.19.2",

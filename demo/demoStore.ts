@@ -2,6 +2,7 @@
 import { useSyncExternalStore } from 'react'
 import type { SplitMethod } from '../src/features/spaces/types/space'
 import { persistSharedMock, registerSharedResource, syncSharedMock } from './sharedClient'
+import mockData from '../shared/mockData.json'
 
 export const DEMO_PASSWORD = 'Demo1234!'
 const STORAGE_KEY = 'duobalance-mock-v1'
@@ -69,14 +70,7 @@ function account(
 }
 
 function initialState(): DemoState {
-  const users = [
-    account('nuevo', 'nuevo@duobalance.test', 'Isabel', 'Sin espacio'),
-    account('solo', 'solo@duobalance.test', 'Juan', 'Espacio sin pareja'),
-    account('rocio', 'rocio@duobalance.test', 'Rocío', 'Pareja completa · creadora'),
-    account('pablo', 'pablo@duobalance.test', 'Pablo', 'Pareja completa · invitado'),
-    account('ines', 'ines@duobalance.test', 'Maria', 'Disponible para invitaciones'),
-    account('mateo', 'mateo@duobalance.test', 'Curro', 'Disponible para invitaciones'),
-  ]
+  const users = mockData.users.map((user) => account(user.key, user.email, user.name, user.description))
 
   return {
     user: null,

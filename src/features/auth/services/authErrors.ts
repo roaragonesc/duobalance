@@ -1,5 +1,6 @@
 import { isAuthError } from '@supabase/supabase-js'
 import { SupabaseNotConfiguredError } from '../../../lib/supabase/client'
+import { HttpError } from '../../../api/http'
 
 const MESSAGES: Record<string, string> = {
   invalid_credentials:
@@ -26,6 +27,7 @@ const NETWORK_MESSAGE =
   'No se ha podido conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.'
 
 export function getAuthErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof HttpError) return error.message
   if (error instanceof SupabaseNotConfiguredError) {
     return 'El servicio de autenticación todavía no está configurado.'
   }

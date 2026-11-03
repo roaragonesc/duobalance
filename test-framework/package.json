@@ -1,0 +1,29 @@
+{
+  "name": "duobalance-test-framework",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:db": "vitest run --project db",
+    "browsers": "playwright install chromium",
+    "report:api": "playwright show-report ../playwright-report/api/full-suite",
+    "report:e2e": "playwright show-report ../playwright-report/mock",
+    "test:api": "node --import tsx helpers/runApiTests.ts",
+    "test:api:direct": "playwright test --config playwright.api.config.ts",
+    "test:e2e": "playwright test --config playwright.mock.config.ts",
+    "test:e2e:api": "playwright test --config playwright.api-e2e.config.ts",
+    "test:demo": "playwright test --config playwright.demo.config.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "oxlint ."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.19.2",
+    "mongodb-memory-server": "^10.2.0",
+    "mongoose": "^8.19.0",
+    "oxlint": "^1.89.0",
+    "tsx": "^4.20.0",
+    "typescript": "~7.0.2"
+  }
+}
