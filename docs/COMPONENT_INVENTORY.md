@@ -236,7 +236,7 @@ la generación no sustituye la documentación de contratos ni de responsabilidad
 | `.github/agents/node-backend.agent.md` | Agente Express/MongoDB | API, contratos públicos y reglas Node |
 | `.github/agents/code-reviewer.agent.md` | Revisor de solo lectura | Evidencia, consumidores y riesgos; sin editar ni ejecutar |
 | `.github/skills/repository-audit/SKILL.md` | Auditoría de lectura reutilizable | Inventario, arquitectura, README y workflow |
-| `.github/workflows/ci.yml` | Instalación, checker, lint y builds | Scripts raíz y lockfile; ejecución remota no verificada aquí |
+| `.github/workflows/ci.yml` | Instalación, typecheck/unitarias del tooling, lint:arch, lint y builds | Scripts raíz y lockfile; ejecución remota no verificada aquí |
 | `.github/workflows/demo-pages.yml` | Compilación y publicación de demo | Vite Pages, artefacto `apps/web/dist-demo`; no ejecutado |
 | `.github/copilot-instructions.md` | Reglas comunes de MVP, permisos y gobierno | Todos los agentes; remite a documentos canónicos |
 | `.github/instructions/react.instructions.md` | Reglas web por archivo | `apps/web/src/**/*.{ts,tsx,css}`; React y coordinador |

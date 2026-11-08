@@ -46,6 +46,7 @@ test('inventory update preserves manual content and tracks every source exactly 
     const updated = updateInventory(entries, emptyInventory)
     assert.ok(updated.endsWith('Texto manual.\n'))
     assert.deepEqual(checkInventory(entries, updated), [])
+    assert.deepEqual(checkInventory(entries, updated.replaceAll('\n', '\r\n')), [])
     const drift = updated.replace('Web / a.tsx', 'Web / incorrect-owner')
     assert.equal(checkInventory(entries, drift)[0].rule, 'inventory-drift')
     assert.deepEqual(entries[0].exports, ['A', 'default'])

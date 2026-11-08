@@ -372,7 +372,8 @@ export function checkInventory(entries: Entry[], document: string): Violation[] 
   for (const file of expected) if (!actual.has(file)) report(file, 'inventory-missing', 'Fuente ausente del inventario.')
   for (const file of actual) if (!expected.has(file)) report(file, 'inventory-orphan', 'Entrada inexistente o fuera del alcance documentado.')
   for (const file of actual) if (rows.filter((row) => row === file).length > 1) report(file, 'inventory-duplicate', 'Entrada duplicada.')
-  if (!violations.length && updateInventory(entries, document) !== document) {
+  if (!violations.length &&
+      updateInventory(entries, document).replaceAll('\r\n', '\n') !== document.replaceAll('\r\n', '\n')) {
     report('docs/COMPONENT_INVENTORY.md', 'inventory-drift', 'Exports, dependencias, consumidores o clasificación desactualizados.')
   }
   return violations

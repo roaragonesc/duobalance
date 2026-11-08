@@ -145,7 +145,7 @@ corrección; excepciones nuevas requieren documentación y pruebas, no skips.
 
 Las pruebas del validador usan `node:test`, sin QA de aplicación ni dependencias
 nuevas. `npm run typecheck:tooling` comprueba tooling con el compilador del workspace
-web. No se ha modificado CI en esta adaptación: el comando existente
-`check:architecture` ahora llama al nuevo análisis, pero añadir tests/typecheck
-del tooling al workflow requiere una autorización separada. No afirmar ejecución
-remota por una validación local.
+web. CI ejecuta `typecheck:tooling`, `test:architecture`, `lint:arch`, lint y
+los builds normal y demo tras la instalación reproducible. El alias
+`check:architecture` sigue disponible para consumidores existentes. No afirmar
+ejecución remota por una validación local.
