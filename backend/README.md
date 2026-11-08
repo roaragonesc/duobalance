@@ -226,46 +226,10 @@ de gestión fuera de los diseños existentes.
 
 ## Tests y CI
 
-El backend ya no contiene tests ni configuración Playwright. Todo el framework
-(API, E2E, unitarias, PostgreSQL, integración y configuraciones) está en
-[test-framework/](../test-framework/README.md), con paquete Playwright propio.
-Instala primero `npm --prefix test-framework ci` además de las dependencias
-de la raíz y del backend.
-
-```powershell
-npm run test:api
-npm run test:e2e:api
-npm run test:e2e -- --workers=2
-npm run test:unit -- --maxWorkers=1
-```
-
-API/E2E API lanzan un **mongod real efímero**, replica set de un nodo con
-`mongodb-memory-server`, sin Docker ni Atlas. La primera ejecución descarga el
-binario de MongoDB 8.0.17 (grande en Windows); después usa caché local.
-No se usa `.env`; se fuerza loopback 27018 y base aleatoria por ejecución.
-API en 4180, frontend API E2E en 4176, UI mock en 4174.
-No ejecutar API y E2E API en paralelo porque usan el mismo puerto aislado.
-Cada test crea cuentas propias; la limpieza borra únicamente su base aleatoria
-tras comprobar el prefijo y UUID. Una terminación forzada puede dejar datos
-temporales. El proceso de MongoDB no depende de la instancia Atlas del usuario.
-
-Los tests API cubren los módulos, privacidad por ID/listado, permisos, snapshots,
-redondeo, liquidaciones concurrentes y seed repetido. El E2E API usa dos
-BrowserContexts independientes: registro/confirmación/login UI, invitación,
-80 € compartidos, 35 € privados, 40 € compartidos, balance de 20 €, recarga y
-relogin sin pérdida de datos. No se copia localStorage ni se usa preparación
-directa de cuentas en la base; solo el seed inicial crea categorías globales.
-TC01_API–TC45_API cubren cada combinación endpoint/método mediante
-`APIRequestContext`, sin navegador. TC46_API–TC58_API conservan las regresiones.
-Cuatro shards secuenciales usan servidores y bases nuevos para respetar los
-límites de autenticación; cualquier fallo propaga salida no cero. HTML/JUnit
-se fusionan al terminar, con trazas separadas por shard.
-
-La pipeline mantiene disparadores diarios 03:00 Europe/Madrid, PR a master y
-manual. Añade build/lint backend, API y UI API con MongoDB efímero al job separado;
-conserva los 20 E2E mock. HTML/JUnit/capturas/traces se suben incluso al fallar,
-sin los buzones de correo. No usa Atlas, secretos ni `continue-on-error`.
-GitHub Actions no se ha ejecutado remotamente desde esta entrega.
+El backend no contiene tests ni configuración de Playwright. Todas las pruebas
+de QA (API, E2E, unitarias, PostgreSQL e integración) se han trasladado a un
+framework de QA específico, en un repositorio separado de este. Las secciones
+siguientes documentan resultados históricos de entregas anteriores.
 
 ## Verificación y límites
 

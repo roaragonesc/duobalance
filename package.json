@@ -7,9 +7,6 @@
     "backend:dev": "npm --prefix backend run dev",
     "backend:build": "npm --prefix backend run build",
     "backend:lint": "npm --prefix backend run lint",
-    "test:api": "npm --prefix test-framework run test:api --",
-    "test:e2e:api": "npm --prefix test-framework run test:e2e:api --",
-    "test:fw:typecheck": "npm --prefix test-framework run typecheck",
     "dev": "vite",
     "dev:mock": "vite",
     "dev:demo": "vite --mode demo",
@@ -22,15 +19,7 @@
     "db:stop": "supabase stop",
     "db:status": "supabase status",
     "db:reset": "supabase db reset",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
-    "test": "npm --prefix test-framework test --",
-    "test:e2e": "npm --prefix test-framework run test:e2e --",
-    "test:demo": "npm run build:demo && npm --prefix test-framework run test:demo",
-    "test:e2e:file": "npm --prefix test-framework run test:e2e --",
-    "test:e2e:ui": "npm --prefix test-framework run test:e2e -- --ui",
-    "test:e2e:debug": "npm --prefix test-framework run test:e2e -- --debug",
-    "test:db": "npm --prefix test-framework run test:db --",
-    "test:unit": "npm --prefix test-framework run test:unit --"
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
@@ -42,13 +31,10 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
-    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "embedded-postgres": "^17.11.0-beta.19",
     "oxlint": "^1.89.0",
-    "pg": "^8.23.1",
     "supabase": "^3.0.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.5"

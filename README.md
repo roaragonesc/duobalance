@@ -7,12 +7,10 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 ## Desarrollo
 
 - `npm install`: instalar las dependencias del proyecto.
-- `npm --prefix test-framework ci`: instalar el framework de pruebas separado.
 - `npm run dev`: iniciar Vite en modo mock (sin llamadas a Supabase).
 - `npm run dev:mock`: alias explícito del modo mock.
 - `npm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
   (`VITE_DATA_MODE=mock`), sin conectar a Supabase.
-- `npm run test:e2e`: ejecutar los flujos Playwright en Chromium.
 - `npm run build`: comprobar TypeScript y generar la aplicación en `dist/`.
 - `npm run lint`: ejecutar Oxlint.
 - `npm run preview`: servir la compilación localmente.
@@ -53,85 +51,13 @@ Los gastos se muestran por fecha, del más reciente al más antiguo, tanto en
 la lista como en los últimos movimientos del dashboard. Si coinciden en fecha,
 aparece primero el último añadido; editarlo no cambia su orden de creación.
 
-Todas las pruebas, fixtures, Page Objects y configuraciones están agrupadas en
-[test-framework/](test-framework/README.md), fuera de `src/` y `backend/`.
-Tiene su propio paquete y lockfile para Playwright; los scripts de la raíz
-delegan las suites en ese directorio. Las unitarias y pruebas PostgreSQL también
-se han trasladado allí, sin cambiar sus casos.
-Los casos REST usan `TC01_API_nombreDelTest`: TC01–45 cubren una operación HTTP
-cada uno; TC46–58 conservan las regresiones de permisos, privacidad y seed.
+## Pruebas de QA
 
-La primera vez, instala Chromium para Playwright con
-`npm --prefix test-framework run browsers`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
-restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
-
-## Integración continua E2E
-
-El workflow [Playwright E2E](.github/workflows/playwright-daily.yml) se ejecuta:
-
-- Todos los días a las **03:00, hora peninsular española**.
-- Al abrir, reabrir o actualizar un Pull Request dirigido a **`master`**, la
-  rama predeterminada del repositorio.
-- Manualmente desde **Actions → Playwright E2E → Run workflow**, seleccionando
-  la rama y confirmando **Run workflow**.
-
-La programación usa `cron: '0 3 * * *'` con `timezone: Europe/Madrid`, admitido
-por la [sintaxis actual de GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule).
-GitHub aplica los cambios de horario: 02:00 UTC en invierno y 01:00 UTC en
-verano, incluidas las fechas de transición. No basta con definir `TZ` en el
-runner para cambiar la hora del disparador.
-
-El workflow debe estar integrado en `master` para habilitar la programación y
-el lanzamiento manual. Los eventos programados usan el último commit de esa
-rama. GitHub no garantiza puntualidad: puede retrasar o descartar ejecuciones
-con mucha carga, especialmente al inicio de cada hora. En repositorios públicos,
-los workflows programados se deshabilitan tras 60 días sin actividad.
-
-El workflow usa Ubuntu, Node.js 22 y `npm ci`; comprueba TypeScript de la aplicación
-y el build mediante `npm run build`, los tipos del framework mediante
-`npm run test:fw:typecheck`, ejecuta lint y pruebas unitarias,
-e instala Chromium con sus dependencias del sistema. El build de producción
-no se sirve ni se conecta a Supabase: se compila con `VITE_DATA_MODE=api`
-porque el build prohíbe empaquetar mocks. No necesita secretos ni credenciales.
-
-Para los E2E, Playwright arranca y detiene su propio Vite en
-`http://127.0.0.1:4174`, exclusivamente con `VITE_DATA_MODE=mock` y
-`VITE_MOCK_SHARED=1`, sin reutilizar servidores existentes. Cada test tiene un
-escenario aislado; los dos BrowserContexts de pareja comparten los datos de
-negocio mediante la cookie de escenario, pero mantienen sesiones independientes.
-La guardia de red bloquea peticiones externas y a Supabase en ambos contextos.
-
-Se ejecutan todos los specs mock de `test-framework/web/` con dos workers. Un fallo activo
-hace fallar el job, incluso si pasa en el reintento (`--fail-on-flaky-tests`);
-se conserva el reintento para capturar la traza de diagnóstico. Los casos
-pendientes deben seguir marcados con `test.fixme()`: se muestran como omitidos,
-**no como superados**. Actualmente los 20 tests existentes están activos.
-Esta suite mock no valida API, RLS ni Supabase real. Un job independiente ejecuta
-`npm run test:api` y `npm run test:e2e:api` con MongoDB efímero local, sin Atlas,
-y publica sus artifacts HTML/JUnit/capturas/traces separados, sin buzones.
-La suite API se distribuye en cuatro lotes secuenciales, cada uno con servidor
-y base efímeros nuevos, para no agotar el límite de autenticaciones durante
-la preparación de cuentas aisladas. Los informes se unen al terminar y cualquier
-fallo de un lote hace fallar el comando y el job.
-
-### Consultar resultados y descargar informes
-
-1. Abre **Actions → Playwright E2E** y selecciona la ejecución (o el check del PR).
-2. Consulta el job **Chromium con datos mock** y el paso E2E para ver los tests
-   superados, fallidos y omitidos; un job que falla antes de E2E no certifica tests.
-3. En **Artifacts**, descarga `playwright-results-<run_id>-<run_attempt>` y
-   extrae el ZIP. Se conserva durante **14 días**, también si fallan las pruebas.
-4. Desde la raíz del proyecto, abre el HTML descargado con
-   `npm --prefix test-framework exec -- playwright show-report "<carpeta extraída>/playwright-report/mock"`.
-   Conserva la carpeta completa, incluidos sus adjuntos.
-5. El ZIP también incluye `test-results/junit.xml` y las capturas/traces en
-   `test-results/artifacts/` cuando se generan. Para abrir una traza:
-   `npm --prefix test-framework exec -- playwright show-trace "<ruta al trace.zip>"`.
-
-El paso de subida se ejecuta con `always()`. Si la instalación o el build falla
-antes de ejecutar Playwright, puede no haber informes; GitHub mostrará el aviso
-correspondiente, sin ocultar el error original. Una cancelación forzada o un fallo
-del runner también puede impedir subir los artifacts.
+Las pruebas de QA (API, E2E, unitarias, PostgreSQL e integración) ya no viven
+en este repositorio: se han trasladado a un framework de QA específico y
+separado. Este repositorio mantiene los principios Accessibility First y
+Testability First para que la aplicación siga siendo automatizable desde ese
+framework externo.
 
 ## Arquitectura
 
@@ -153,8 +79,6 @@ Para probarla localmente: `npm run preview:demo` y abrir
 `http://127.0.0.1:4175/duobalance/`. Usa rutas hash (`#/login`) para permitir
 recargas en GitHub Pages. No carga archivos `.env`, no usa Supabase y nunca
 habilita el servidor compartido E2E. El build normal conserva su bloqueo de mocks.
-`npm run test:demo` compila y comprueba la demo estática en Chromium con viewport
-móvil, recarga de rutas, persistencia, confirmación y recuperación simuladas.
 
 Solo deben introducirse datos ficticios: las cuentas y contraseñas mock se
 guardan en el navegador, sin protección para datos reales. Cada dispositivo
@@ -193,12 +117,6 @@ src/
   routes/               Router y catálogo de navegación de la aplicación
   types/                Reservada para tipos compartidos
 demo/                   Adaptadores mock solo para desarrollo
-test-framework/         Todas las suites y configuraciones de pruebas
-  api/                  REST mediante Playwright APIRequestContext
-  web/                  Flujos UI mock, API real y demo, sin subcarpetas
-  unit/                 Unitarias React y lógica
-  db/                   PostgreSQL histórico
-  integration/          MongoDB efímero y seed
 ```
 
 `App.tsx` monta el router y el enlace accesible para saltar al contenido.
@@ -275,7 +193,7 @@ invitación» (`accept_invitation`, idempotente y transaccional).
    con PKCE el enlace del correo solo funciona en el mismo navegador y origen
    donde te registraste. Los enlaces de confirmación llegan a `/auth/callback`,
    que inicia la sesión, gestiona los errores (`otp_expired`…) y permite reenviar
-   el correo. `npm run test:unit` prueba este flujo con Playwright en navegador.
+   el correo.
 3. Authentication → Providers → Email: mínimo 8 caracteres con minúsculas,
    mayúsculas y números; confirmación de correo activada.
 4. Probar el registro con el correo de la cuenta de Supabase (el SMTP
@@ -293,15 +211,6 @@ invitación» (`accept_invitation`, idempotente y transaccional).
 - `supabase/migrations/`: esquema versionado. Primera migración: `profiles`
   con RLS (cada usuario solo lee y edita su perfil) y alta automática al
   registrarse.
-
-### Pruebas de base de datos
-
-`npm run test:db` arranca un PostgreSQL 17 real sin Docker (`embedded-postgres`),
-simula lo mínimo de Supabase (roles `anon`/`authenticated`, `auth.users`,
-`auth.uid()` y sus privilegios por defecto), aplica las migraciones en orden y
-comprueba esquema, permisos, RLS, funciones RPC, triggers, invitaciones y
-concurrencia real con dos conexiones simultáneas. No sustituye a una prueba
-final en un Supabase local (`npm run db:start`, requiere Docker).
 
 ### Puesta en marcha local
 
@@ -343,7 +252,6 @@ se abren directamente o se recargan, sin reescribir los recursos estáticos.
 Vite ya proporciona este comportamiento durante desarrollo y preview.
 
 Todavía no hay service worker, instalación PWA ni funcionamiento offline.
-Playwright cubre los principales flujos de autenticación y espacios en modo mock.
 
 ## Accessibility First + Testability First
 

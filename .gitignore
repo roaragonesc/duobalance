@@ -29,10 +29,7 @@ dist-demo/
 .env.*
 !.env.example
 !.env.demo
-playwright-report/
-test-results/
 coverage/
 *.log
 backend/.local-mail/
 backend/dist/
-test-framework/db/.postgres-*/

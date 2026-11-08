@@ -3,7 +3,7 @@
 ## Contexto del proyecto
 DuoBalance es una PWA para gestionar gastos compartidos entre dos personas, desarrollada bajo la marca Órbita Nexo.
 
-Tecnologías: React, TypeScript, Vite, Tailwind CSS v4. Próximamente: React Router, Supabase, Vitest y Playwright.
+Tecnologías: React, TypeScript, Vite, Tailwind CSS v4. Próximamente: React Router y Supabase. Las pruebas automatizadas viven en un framework de QA separado.
 
 Colores:
 - Navy: #0B2038
@@ -97,19 +97,17 @@ Evitar waitForTimeout() y comprobaciones genéricas como toBeTruthy() para valid
 - No inventar decisiones de negocio pendientes.
 
 ## Estrategia de testing
-- Vitest para pruebas unitarias.
-- Playwright Test con TypeScript para E2E y API.
-- Tests aislados, repetibles y sin datos reales.
-- Utilizar fixtures y Page Object Model cuando aporten valor.
-- Comprobar permisos, privacidad, repartos, liquidaciones y cálculos.
-- Preparar integración con GitHub Actions.
+- Las pruebas de QA (unitarias, E2E y API) viven en un framework de QA
+  específico, en un repositorio separado; este repositorio no contiene tests.
+- Mantener la aplicación automatizable desde ese framework externo
+  (Accessibility First y Testability First).
 - Aplicar las restricciones de seguridad también en Supabase, no solo en la interfaz.
 
 ## Definition of Done
 Antes de finalizar cualquier desarrollo:
 1. Comprobar accesibilidad y HTML semántico.
-2. Verificar que los elementos pueden localizarse con Playwright.
-3. Añadir o actualizar los tests correspondientes.
-4. Ejecutar npm run build.
-5. Corregir errores de compilación.
-6. Resumir los archivos modificados y las pruebas ejecutadas.
+2. Verificar que los elementos pueden localizarse con Playwright desde el
+   framework de QA externo.
+3. Ejecutar npm run build.
+4. Corregir errores de compilación.
+5. Resumir los archivos modificados.
