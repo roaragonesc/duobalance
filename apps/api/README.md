@@ -262,8 +262,8 @@ con Mongoose simulado en `tests/database.test.ts`.
 `npm run typecheck:unit` verifica sus tipos. No conecta a ninguna base ni
 sustituye verificar las operaciones financieras sobre MongoDB real.
 El tooling arquitectónico dispone de pruebas con `node:test`.
-La CI existente ejecuta las pruebas del tooling y builds; las nuevas unitarias
-se ejecutan localmente y no se modifica el workflow en esta fase.
+CI ejecuta `typecheck:unit` y `test:unit` de web/API además de los controles
+del tooling, lint y builds. No necesita credenciales, MongoDB ni ejecutar el seed.
 
 ## Verificación y límites
 

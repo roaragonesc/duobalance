@@ -97,7 +97,8 @@ No requieren dependencias nuevas: se usa el TypeScript instalado en web y el
 runner de Node. [Arquitectura](docs/ARCHITECTURE.md) documenta exclusiones y
 limitaciones; estos controles no certifican QA, accesibilidad ni seguridad.
 El alias `check:architecture` sigue disponible. CI ejecuta el typecheck y las
-unitarias del tooling, `lint:arch`, lint y los builds normal y demo.
+unitarias del tooling, `typecheck:unit` y `test:unit` de web/API,
+`lint:arch`, lint y los builds normal y demo. Las unitarias no conectan a MongoDB.
 Si Copilot no ofrece delegación, usa selección manual o Fullstack directamente
 y comunica la limitación; no simules ejecuciones de agentes.
 
