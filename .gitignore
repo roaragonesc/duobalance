@@ -31,5 +31,6 @@ dist-demo/
 !.env.demo
 coverage/
 *.log
-backend/.local-mail/
-backend/dist/
+apps/api/.local-mail/
+apps/api/dist/
+apps/web/dist-demo/

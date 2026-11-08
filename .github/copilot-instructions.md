@@ -3,7 +3,38 @@
 ## Contexto del proyecto
 DuoBalance es una PWA para gestionar gastos compartidos entre dos personas, desarrollada bajo la marca Órbita Nexo.
 
-Tecnologías: React, TypeScript, Vite, Tailwind CSS v4. Próximamente: React Router y Supabase. Las pruebas automatizadas viven en un framework de QA separado.
+Tecnologías: React, TypeScript, Vite y Tailwind CSS v4 en `apps/web`; Express,
+TypeScript y MongoDB en `apps/api`. El repositorio usa pnpm workspaces y comparte
+fixtures ficticios en `shared/`. El único backend es la API Node/MongoDB.
+Las pruebas de desarrollador unitarias y de tooling pueden vivir aquí.
+
+## Gobierno del repositorio
+
+El punto de entrada del equipo es [AGENTS.md](../AGENTS.md). Fullstack coordina
+React, Node y revisión de lectura únicamente cuando la delegación aporte valor.
+No ejecutar todos los agentes por defecto ni permitir ediciones concurrentes
+del mismo archivo. Usar el contrato de asignación/entrega del workflow.
+
+Antes de cambiar código, consultar [el inventario](../docs/COMPONENT_INVENTORY.md),
+[la arquitectura](../docs/ARCHITECTURE.md),
+[el workflow obligatorio](../docs/AI_AGENT_WORKFLOW.md) y
+[las buenas prácticas](../docs/BEST_PRACTICES.md).
+Seguir Entender → Planificar → Implementar → Verificar → Corregir → Reportar.
+Localizar el propietario y los consumidores; reutilizar exports existentes.
+Actualizar el inventario en el mismo cambio al crear, borrar, mover o renombrar
+piezas o cambiar exports/imports: `npm run inventory:update`, revisar el diff y
+`npm run lint:arch`. Las tablas manuales describen responsabilidades y contratos;
+el bloque generado registra las fuentes del alcance documentado, no su semántica.
+
+Las reglas por archivo están en [React](instructions/react.instructions.md),
+[Node](instructions/node.instructions.md),
+[arquitectura](instructions/architecture.instructions.md) y
+[testing](instructions/testing.instructions.md). Conservar las reglas del MVP
+siguientes sin duplicarlas en cada agente.
+
+No hacer commit/push automáticamente. Instalaciones, movimientos, eliminaciones,
+cambios de infraestructura/CI requieren permiso explícito. Ejecutar solo
+comprobaciones existentes y autorizadas; reportar PASS, FAIL, BLOCKED y NOT_RUN.
 
 Colores:
 - Navy: #0B2038
@@ -21,7 +52,7 @@ Toda la interfaz debe estar en español de España.
 - No implementar funcionalidades fuera del MVP.
 - Nunca incluir credenciales ni secretos en el repositorio.
 
-## Accesibilidad y Playwright
+## Accesibilidad
 
 Toda la aplicación debe desarrollarse siguiendo los principios Accessibility First y Testability First.
 
@@ -35,45 +66,6 @@ Toda la aplicación debe desarrollarse siguiendo los principios Accessibility Fi
 - Utilizar role="alert" para errores importantes y role="status" para mensajes informativos.
 - Los diálogos deben gestionar correctamente el foco y el teclado.
 - Mantener contraste suficiente y foco visible.
-
-### Localizadores Playwright
-Priorizar:
-1. getByRole()
-2. getByLabel()
-3. getByPlaceholder()
-4. getByText()
-5. getByTestId() únicamente cuando sea necesario.
-
-Evitar:
-- XPath.
-- Selectores basados en clases CSS o Tailwind.
-- Índices y posiciones del DOM.
-- Identificadores dinámicos.
-- data-testid innecesarios.
-
-Ejemplo:
-
-```typescript
-await page.getByLabel('Correo electrónico').fill('test@example.com')
-
-await page.getByRole('button', {
-  name: 'Iniciar sesión'
-}).click()
-
-await expect(
-  page.getByRole('heading', { name: 'Dashboard' })
-).toBeVisible()
-```
-
-### Aserciones
-Utilizar aserciones web-first:
-- toBeVisible()
-- toHaveText()
-- toHaveURL()
-- toBeEnabled()
-- toHaveValue()
-
-Evitar waitForTimeout() y comprobaciones genéricas como toBeTruthy() para validar elementos de interfaz.
 
 ## Formularios
 - Mostrar validaciones claras y accesibles.
@@ -97,17 +89,16 @@ Evitar waitForTimeout() y comprobaciones genéricas como toBeTruthy() para valid
 - No inventar decisiones de negocio pendientes.
 
 ## Estrategia de testing
-- Las pruebas de QA (unitarias, E2E y API) viven en un framework de QA
-  específico, en un repositorio separado; este repositorio no contiene tests.
-- Mantener la aplicación automatizable desde ese framework externo
-  (Accessibility First y Testability First).
-- Aplicar las restricciones de seguridad también en Supabase, no solo en la interfaz.
+- Aquí pueden vivir pruebas de desarrollador, como unitarias y tests de tooling.
+  El tooling tiene `npm run test:architecture` con node:test; no hay un runner
+  de unitarias de aplicación declarado.
+- Mantener pruebas deterministas, centradas en comportamiento y sin esperas fijas.
+- Aplicar validación y autorización en la API Node, no solo en la interfaz.
 
 ## Definition of Done
 Antes de finalizar cualquier desarrollo:
 1. Comprobar accesibilidad y HTML semántico.
-2. Verificar que los elementos pueden localizarse con Playwright desde el
-   framework de QA externo.
-3. Ejecutar npm run build.
+2. Verificar etiquetas, nombres accesibles, teclado y estados de formularios.
+3. Ejecutar el build existente y autorizado (`pnpm run build` o `npm run build`).
 4. Corregir errores de compilación.
 5. Resumir los archivos modificados.

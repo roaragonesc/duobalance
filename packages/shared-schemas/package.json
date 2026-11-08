@@ -1,0 +1,16 @@
+{
+  "name": "@duobalance/shared-schemas",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "dependencies": {
+    "@duobalance/shared-types": "workspace:*"
+  }
+}
