@@ -10,6 +10,7 @@ type ExpenseInput = {
 }
 type IncomeInput = { description: string; amountCents: number; date: string }
 
+/** Lista los gastos del mes visibles para el miembro: compartidos y sus propios individuales. */
 export async function listExpenses(userId: string, spaceId: string, month: string, kind?: string, categoryId?: string) {
   await memberSpace(spaceId, userId)
   return Expense.find({
@@ -19,6 +20,7 @@ export async function listExpenses(userId: string, spaceId: string, month: strin
   }).sort({ date: -1, createdAt: -1, _id: -1 })
 }
 
+/** Obtiene un gasto accesible y comprueba la pertenencia al espacio; los privados ajenos devuelven 404. */
 export async function getExpense(userId: string, id: string) {
   const expense = await Expense.findOne({ _id: id, $or: [{ kind: 'shared' }, { createdBy: userId }] })
   if (!expense) throw missing()
@@ -26,6 +28,7 @@ export async function getExpense(userId: string, id: string) {
   return expense
 }
 
+/** Calcula el reparto proporcional del creador con los ingresos del mes dentro de la transacción. */
 async function basis(spaceId: string, ownerId: string, month: string, session: ClientSession) {
   const incomes = await Income.find({ spaceId, date: { $gte: `${month}-01`, $lte: `${month}-31` } }).session(session)
   const total = safeSum(incomes.map((item) => item.amountCents))
@@ -33,6 +36,10 @@ async function basis(spaceId: string, ownerId: string, month: string, session: C
   return proportionalBasis(owner, total)
 }
 
+/**
+ * Crea o edita un gasto propio en una transacción y bloquea su categoría.
+ * Al crear guarda el reparto histórico; al editar conserva ese reparto y el tipo.
+ */
 export async function saveExpense(userId: string, spaceId: string, input: ExpenseInput, id?: string) {
   return mutateSpace(spaceId, userId, async (space, session) => {
     await lockCategory(input.categoryId, userId, session)
@@ -53,6 +60,10 @@ export async function saveExpense(userId: string, spaceId: string, input: Expens
   })
 }
 
+/**
+ * Elimina un gasto únicamente si el usuario es su creador.
+ * Serializa la operación en el espacio; conserva las liquidaciones y devuelve 404 si no puede borrarlo.
+ */
 export async function removeExpense(userId: string, id: string) {
   const expense = await getExpense(userId, id)
   return mutateSpace(expense.spaceId.toString(), userId, async (_space, session) => {
@@ -61,12 +72,14 @@ export async function removeExpense(userId: string, id: string) {
   })
 }
 
+/** Lista los ingresos mensuales de ambos miembros después de verificar el acceso al espacio. */
 export async function listIncomes(userId: string, spaceId: string, month: string) {
   await memberSpace(spaceId, userId)
   return Income.find({ spaceId, date: { $gte: `${month}-01`, $lte: `${month}-31` } })
     .sort({ date: -1, createdAt: -1, _id: -1 })
 }
 
+/** Obtiene un ingreso para un miembro del espacio; consultarlo no concede permiso de edición. */
 export async function getIncome(userId: string, id: string) {
   const income = await Income.findById(id)
   if (!income) throw missing()
@@ -74,6 +87,7 @@ export async function getIncome(userId: string, id: string) {
   return income
 }
 
+/** Crea o actualiza un ingreso del usuario en una transacción; nunca modifica ingresos de la pareja. */
 export async function saveIncome(userId: string, spaceId: string, input: IncomeInput, id?: string) {
   return mutateSpace(spaceId, userId, async (_space, session) => {
     if (id) {
@@ -87,6 +101,7 @@ export async function saveIncome(userId: string, spaceId: string, input: IncomeI
   })
 }
 
+/** Borra solo un ingreso propio con bloqueo del espacio y sin recalcular repartos históricos. */
 export async function removeIncome(userId: string, id: string) {
   const income = await getIncome(userId, id)
   return mutateSpace(income.spaceId.toString(), userId, async (_space, session) => {
@@ -95,6 +110,7 @@ export async function removeIncome(userId: string, id: string) {
   })
 }
 
+/** Recupera una liquidación existente después de comprobar la pertenencia al espacio. */
 export async function getSettlement(userId: string, id: string) {
   const settlement = await Settlement.findById(id)
   if (!settlement) throw missing()
@@ -102,6 +118,7 @@ export async function getSettlement(userId: string, id: string) {
   return settlement
 }
 
+/** Compone el dashboard mensual con gastos compartidos, categorías, contribuciones y comparación anterior. */
 export async function summary(userId: string, spaceId: string, month: string) {
   const list = (await listExpenses(userId, spaceId, month)).filter((item) => item.kind === 'shared')
   const result = await balance(userId, spaceId, month)

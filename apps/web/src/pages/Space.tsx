@@ -13,6 +13,7 @@ const MAX_MEMBERS = 2
 
 const sectionTitleClassName = 'text-[21px] font-bold text-navy'
 
+/** Fila de miembro con nombre, información de cuenta e indicación opcional de su reparto. */
 function MemberRow({
   name,
   detail,
@@ -54,6 +55,7 @@ function MemberRow({
   )
 }
 
+/** Página del espacio con miembros, invitaciones y configuración de reparto según el rol del usuario. */
 export default function Space() {
   const { displayName, space } = useActiveWorkspace()
   const auth = useAuth()

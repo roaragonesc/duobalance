@@ -25,6 +25,7 @@ type ExpensesViewProps = {
 }
 
 
+/** Identifica visualmente y con texto si el gasto es compartido o individual. */
 function KindBadge({ kind }: { kind: ExpenseKind }) {
   const shared = kind === 'shared'
   const Icon = shared ? UsersIcon : UserIcon
@@ -40,6 +41,7 @@ function KindBadge({ kind }: { kind: ExpenseKind }) {
   )
 }
 
+/** Fila de gasto con categoría, pagador y acciones disponibles solo para su creador. */
 function ExpenseRow({
   expense,
   partnerName,
@@ -92,6 +94,7 @@ function ExpenseRow({
 }
 
 
+/** Listado mensual de gastos con indicadores, filtros locales, estados y petición de borrado. */
 export default function ExpensesView({
   state,
   month,

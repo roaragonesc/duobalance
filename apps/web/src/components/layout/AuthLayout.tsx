@@ -2,6 +2,7 @@ import { Outlet } from 'react-router'
 import AuthBackdrop from '../../features/auth/components/AuthBackdrop'
 import Logo from '../ui/Logo'
 
+/** Layout oscuro de autenticación con marca, fondo decorativo y contenido de la ruta hija. */
 export default function AuthLayout() {
   return (
     <div className="relative isolate flex min-h-dvh flex-col items-center justify-center bg-navy px-4 py-10">

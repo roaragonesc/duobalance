@@ -12,7 +12,7 @@ const repositoryRoot = path.resolve(webRoot, '../..')
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, repositoryRoot, 'VITE_')
   const configuredMode = env.VITE_DATA_MODE
-  const dataMode = configuredMode || (command === 'serve' ? 'mock' : 'api')
+  const dataMode = mode === 'api' ? 'api' : configuredMode || (command === 'serve' ? 'mock' : 'api')
   if (mode === 'demo' && dataMode !== 'mock') {
     throw new Error('El modo demo requiere VITE_DATA_MODE=mock y no permite conectar servicios externos.')
   }

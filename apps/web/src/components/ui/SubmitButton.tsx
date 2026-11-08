@@ -16,6 +16,7 @@ const variantClasses = {
     'bg-linear-to-b from-[#00A967] to-[#009A5F] text-white shadow-[0_8px_18px_rgba(0,154,95,0.25)] hover:from-[#009A5F] hover:to-[#008C56] focus-visible:outline-navy',
 }
 
+/** Botón de envío con texto de carga y bloqueo mientras el formulario está enviándose. */
 export default function SubmitButton({
   label,
   loadingLabel,

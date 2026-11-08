@@ -6,6 +6,7 @@ import { currentMonth, formatDay, type MonthKey } from '../../../lib/month'
 import type { DashboardExpense } from '../types'
 import { IconTile, panelClassName } from '../../../components/ui/panel'
 
+/** Lista los últimos gastos con fecha, categoría e importe y conserva el mes al abrir el listado completo. */
 export default function RecentExpenses({
   expenses,
   month,

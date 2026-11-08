@@ -18,6 +18,7 @@ function confirmationUrl(token: string, next: string | null): string {
   })
 }
 
+/** Panel exclusivo de mock/demo para cambiar cuentas ficticias, abrir enlaces simulados y restablecer datos. */
 export function DemoPanel() {
   const { user, users } = useDemoState()
   const selectId = useId()

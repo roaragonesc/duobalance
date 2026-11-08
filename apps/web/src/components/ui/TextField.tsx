@@ -22,6 +22,7 @@ type TextFieldProps = {
   inputMode?: 'text' | 'decimal' | 'email'
 }
 
+/** Campo controlado de texto, correo o contraseña con etiqueta, errores y visibilidad opcional. */
 export default function TextField({
   id,
   label,

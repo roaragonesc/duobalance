@@ -14,6 +14,7 @@ function formatMembers(count: number) {
   return count === 1 ? '1 miembro' : `${count} miembros`
 }
 
+/** Carga el espacio activo y compone navegación, miembros y páginas privadas con estados de carga/error. */
 export default function AppLayout() {
   const auth = useAuth()
   const userId = auth.status === 'authenticated' ? auth.session.user.id : ''

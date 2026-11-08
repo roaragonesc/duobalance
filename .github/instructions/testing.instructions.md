@@ -6,8 +6,12 @@ applyTo: apps/**/*,packages/**/*,scripts/**/*
 
 - Developer tests, such as focused unit tests and tooling validator tests, may
   live here when required. The architecture validator uses Node's built-in
-  `node:test` via `npm run test:architecture`. No application unit runner is
-  currently declared; do not invent commands or install one without permission.
+  `node:test` via `npm run test:architecture`. Focused HTTP client/service tests
+  use `node:test` and `tsx` via `npm run test:unit`; `npm run typecheck:unit`
+  checks their types. Client tests live in `apps/web/tests`, outside browser sources;
+  connector tests live in `apps/api/tests` with mocked Mongoose. Both suites
+  must not connect to databases or duplicate the external QA framework.
+  Do not install additional runners without permission.
 - Keep developer tests independent and deterministic. Reuse fixtures/factories
   where useful, avoid fixed sleeps, and never skip failures to hide defects.
 - Keep the web app automatable with semantic HTML, accessible names, labels,

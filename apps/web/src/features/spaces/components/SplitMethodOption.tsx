@@ -10,6 +10,7 @@ type SplitMethodOptionProps = {
   onChange: () => void
 }
 
+/** Opción de reparto con radio nativo, descripción asociada y selección por teclado. */
 export default function SplitMethodOption({
   name,
   value,

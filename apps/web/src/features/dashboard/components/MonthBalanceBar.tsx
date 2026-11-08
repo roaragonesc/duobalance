@@ -4,6 +4,7 @@ import type { DashboardSummary } from '../types'
 import { IconTile, panelClassName } from '../../../components/ui/panel'
 import { PendingStatus } from './SummaryCards'
 
+/** Resume aportaciones, gastos y estado de deuda del mes consultado. */
 export default function MonthBalanceBar({ summary }: { summary: DashboardSummary }) {
   const contributed =
     summary.myContributionCents + summary.partnerContributionCents

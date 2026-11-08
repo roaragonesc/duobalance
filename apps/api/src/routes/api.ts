@@ -7,6 +7,7 @@ import { requireCsrf, requireSession } from '../middlewares/session.js'
 import type { Mailer } from '../services/mail.js'
 import { financeRoutes } from './finance.js'
 
+/** Registra autenticación, perfiles y finanzas con límites de solicitudes, sesión y CSRF según operación. */
 export function apiRoutes(env: Environment, mailer: Mailer, dummyHash: string) {
   const router = Router()
   const auth = authControllers(env, mailer, dummyHash)

@@ -3,7 +3,9 @@ import type { ApiErrorResponse } from '@duobalance/shared-types'
 import { ZodError } from 'zod'
 import { ApiError } from '../utils/ApiError.js'
 
+/** Traduce validación, conflictos y fallos internos a errores HTTP coherentes sin datos sensibles. */
 export const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
+  /** Envuelve los errores públicos en la forma JSON compartida por API y navegador. */
   const sendError = (status: number, body: ApiErrorResponse['error']) => {
     response.status(status).json({ error: body })
   }

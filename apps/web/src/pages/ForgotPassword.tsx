@@ -27,6 +27,7 @@ function getForgotPasswordErrorMessage(error: unknown) {
   )
 }
 
+/** Solicita un enlace de recuperación con validación y confirmación que no revela si el correo existe. */
 export default function ForgotPassword() {
   const [isSent, setIsSent] = useState(false)
   const { values, errors, formError, isSubmitting, setValue, handleSubmit } =

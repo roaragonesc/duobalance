@@ -34,6 +34,7 @@ function getRegisterErrorMessage(error: unknown) {
   )
 }
 
+/** Registra una cuenta con contraseña validada y muestra confirmación/reenvío antes de iniciar sesión. */
 export default function Register() {
   const { from } = readAuthLocationState(useLocation().state)
   const [isRegistered, setIsRegistered] = useState(false)

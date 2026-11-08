@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router'
 
+/** Centra las páginas claras de autenticación dentro del contenido principal accesible. */
 export default function AuthLightLayout() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-ice px-4 py-8">

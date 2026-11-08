@@ -6,6 +6,7 @@ import { useActiveWorkspace } from '../features/spaces/workspaceContext'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useMonthParam } from '../hooks/useMonthParam'
 
+/** Carga balance mensual e historial del espacio y los entrega a la vista con reintentos independientes. */
 export default function Balance() {
   const { space } = useActiveWorkspace()
   const { month } = useMonthParam()

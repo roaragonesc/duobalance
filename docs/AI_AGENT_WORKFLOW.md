@@ -75,6 +75,9 @@ por defecto.
 | `npm run inventory:update` | Regenerar tabla de fuentes; modifica el inventario y también devuelve infracciones |
 | `npm run test:architecture` | Unitarias positivas/negativas del validador con node:test |
 | `npm run typecheck:tooling` | TypeScript estricto del validador y sus pruebas |
+| `npm run test:unit` | Unitarias de cliente/servicios HTTP y conector MongoDB con node:test/tsx, sin conexiones externas |
+| `npm run typecheck:unit` | TypeScript estricto de las unitarias web/API y consumidores |
+| `npm run backend:check` | Conexión, transacciones y categorías; solo con configuración privada y permiso de conexión |
 | `pnpm run lint` | Oxlint en web y API |
 | `pnpm run build` | TypeScript y compilación web/API |
 | `pnpm run build:demo` | TypeScript y bundle mock estático |

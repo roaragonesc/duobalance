@@ -43,6 +43,7 @@ const kindOptions = [
   },
 ] as const
 
+/** Formulario validado de gasto con importe, fecha, categoría y privacidad; bloquea el tipo al editar. */
 export default function ExpenseForm({
   initialValues,
   submitLabel,

@@ -34,13 +34,27 @@ selecciona mocks durante desarrollo/demo sin cambiar los contratos de las featur
 En modo API se usan directamente los servicios HTTP de las features, sin
 sustitución del backend mediante plugins.
 
+El transporte exige un decoder Zod para cada respuesta consumida, valida JSON,
+campos e importes y no muestra valores inválidos. La feature sigue siendo dueña
+del mapeo al contrato UI. CSRF se recupera con una petición compartida; solo se
+reintenta una vez un `invalid_csrf` rechazado antes de la mutación. Los demás
+errores no se reintentan automáticamente. La caducidad invalida la sesión del
+provider; respuestas de una sesión anterior no invalidan una sesión nueva.
+Los catálogos se consultan una vez por carga, no por movimiento.
+
+La decisión y sus límites están en [ADR 0002](adr/0002-api-runtime-contracts.md).
+
 ## API
 
 `apps/api/src/` mantiene capas explícitas: `routes` y `controllers` traducen
 HTTP, `validators` comprueba entradas, `services` aplica reglas,
 `repositories` accede a persistencia y `models` define MongoDB. La composición
 de Express está en `app.ts`; el ciclo de vida de la conexión está en
-`server.ts`.
+`server.ts`, reutilizando `config/database.ts` con seed y diagnóstico.
+La conexión comprueba soporte de transacciones antes de aceptar peticiones.
+`backend:check` consulta conexión/categorías sin crear documentos; requiere la
+configuración privada guardada. Atlas no se presupone operativo y producción
+sigue bloqueada.
 
 No se introducen módulos vacíos ni se reorganiza por entidad cuando la
 responsabilidad ya está cohesionada por capa. Las operaciones financieras
@@ -69,7 +83,10 @@ el comportamiento financiero.
 
 La QA de aplicación pertenece al framework externo.
 Aquí caben pruebas de desarrollador, como unitarias y tests de tooling. El
-validador usa `node:test`; no hay un runner de unitarias de aplicación declarado.
+validador usa `node:test`. `apps/web/tests` contiene unitarias de cliente/servicios
+con `node:test` y `tsx` (`test:unit`, `typecheck:unit`), sin conexiones externas.
+`apps/api/tests` comprueba el conector con Mongoose simulado; tampoco conecta a
+una base real. Los comandos raíz ejecutan las unitarias de ambas aplicaciones.
 No duplicar QA ni añadir infraestructura de pruebas por defecto.
 
 ## Gobierno y ownership
@@ -93,14 +110,16 @@ no cae a un parser incompleto ni instala dependencias.
 
 Fuentes inventariables:
 
-- TS/TSX/JS/JSX/MJS/CJS/MTS/CTS, CSS y JSON en `apps/web/src`, `apps/web/demo`,
-  `apps/api/src`, `packages`, `scripts` y `shared`.
+- TS/TSX/JS/JSX/MJS/CJS/MTS/CTS, CSS y JSON en `apps/web/src`, `apps/web/demo`, `apps/web/tests`,
+  `apps/api/src`, `apps/api/tests`, `packages`, `scripts` y `shared`.
 - Configs de esas extensiones directamente en raíz, `apps/web` y `apps/api`.
 - Excluidos `node_modules`, `.git`, `.tmp`, `dist`, `dist-demo`, `coverage` y
   enlaces simbólicos.
 - Recursos binarios/SVG, HTML, lockfiles, docs/UX y YAML de workflows
   no son fuentes del grafo. Gobierno y workflows se documentan
   manualmente en el inventario. Imports a recursos existentes no son ciclos de código.
+- Las unitarias web se inventarían y sus imports se analizan, pero no forman
+  parte del bundle: los builtins Node son legítimos allí, no en `apps/web/src`.
 
 | Regla | Qué verifica |
 | --- | --- |
@@ -111,6 +130,7 @@ Fuentes inventariables:
 | `public-import` | Consumidores de paquetes compartidos usan destinos/subpaths declarados en `exports`; los internos del mismo paquete son legítimos |
 | `api-layer` | Servicios/repositorios/modelos no importan rutas/controllers/middlewares HTTP |
 | `web-composition` | Features/UI no dependen de páginas ni bootstrap/providers/router; `app/router/screens.ts` es metadata pública de navegación consumida legítimamente por layouts |
+| `developer-test-boundary` | Las fuentes de aplicación y demo no importan las unitarias de desarrollador; las unitarias sí consumen su propia aplicación |
 | `shared-safe` | Paquetes compartidos no importan tooling; contratos y fuentes de navegador no importan builtins Node ni dependencias de servidor explícitas (`express`, `mongoose`, `argon2`) |
 | `source-scope` | Una dependencia local inventariable no desaparece del análisis por quedar fuera de los directorios acordados |
 | `dependency-cycle` | Ciclos, incluidos self-imports y dependencias solo de tipos, dentro del grafo analizado |

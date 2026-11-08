@@ -4,6 +4,7 @@ import { ArrowRightIcon, HomeIcon } from '../components/ui/icons'
 import FormAlert from '../components/ui/FormAlert'
 import SubmitButton from '../components/ui/SubmitButton'
 import LoadingScreen from '../components/ui/LoadingScreen'
+import RetryPanel from '../components/ui/RetryPanel'
 import TextField from '../components/ui/TextField'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import HouseIllustration from '../features/spaces/components/HouseIllustration'
@@ -31,14 +32,18 @@ function getCreateSpaceErrorMessage(error: unknown) {
   )
 }
 
+/** Comprueba si ya existe un espacio y, si no, presenta su configuración inicial. */
 export default function Onboarding() {
   const auth = useAuth()
   const userId = auth.status === 'authenticated' ? auth.session.user.id : ''
   const load = useCallback(() => getCurrentSpaceId(userId), [userId])
-  const { state } = useAsyncData(load)
+  const { state, reload } = useAsyncData(load)
 
   if (state.status === 'loading') {
     return <LoadingScreen label="Cargando tu espacio…" />
+  }
+  if (state.status === 'error') {
+    return <RetryPanel message="No se ha podido consultar tu espacio. Inténtalo de nuevo." onRetry={reload} />
   }
   // A member already has a space; creating another one would fail.
   if (state.status === 'ready' && state.data) {
@@ -47,6 +52,7 @@ export default function Onboarding() {
   return <CreateSpaceForm />
 }
 
+/** Crea el espacio con nombre y método de reparto validados y continúa al paso de invitación. */
 function CreateSpaceForm() {
   const navigate = useNavigate()
   const { values, errors, formError, isSubmitting, setValue, handleSubmit } =

@@ -25,6 +25,7 @@ function getInviteErrorMessage(error: unknown) {
 
 type Invitation = { url: string; email: string }
 
+/** Crea una invitación ligada al correo de la pareja y muestra el enlace para compartirla. */
 export default function InvitePartner() {
   const [invitation, setInvitation] = useState<Invitation | null>(null)
   const { values, errors, formError, isSubmitting, setValue, handleSubmit } =

@@ -10,6 +10,7 @@ import { ApiError } from './utils/ApiError.js'
 import type { Mailer } from './services/mail.js'
 import { openApi } from './config/openApi.js'
 
+/** Compone Express, protecciones HTTP, diagnóstico y rutas sin abrir una conexión MongoDB implícita. */
 export function createApp(env: Environment, mailer: Mailer, dummyHash: string) {
   const app = express()
   app.disable('x-powered-by')
@@ -34,10 +35,12 @@ export function createApp(env: Environment, mailer: Mailer, dummyHash: string) {
     next()
   })
   app.use(express.json({ limit: '16kb' }))
+  /** Informa con 200/503 si la conexión MongoDB está disponible. */
   app.get('/api/v1/health', (_request, response) => {
     const ready = mongoose.connection.readyState === 1
     response.status(ready ? 200 : 503).json({ status: ready ? 'ok' : 'unavailable' })
   })
+  /** Expone el documento OpenAPI local, sin cargar interfaces desde terceros. */
   app.get('/api/v1/api-docs', (_request, response) => { response.json(openApi) })
   app.use('/api/v1', apiRoutes(env, mailer, dummyHash))
   app.use((_request, _response) => { throw new ApiError(404, 'not_found', 'No se ha encontrado el recurso.') })

@@ -10,7 +10,7 @@ type EditorShellProps = {
   children: ReactNode
 }
 
-// Frame of the create/edit form pages of the app screens.
+/** Marco de los editores con enlace de vuelta, título y tarjeta para el formulario de la feature. */
 export default function EditorShell({ backTo, backLabel, title, children }: EditorShellProps) {
   return (
     <div className="mx-auto max-w-[720px] space-y-6">

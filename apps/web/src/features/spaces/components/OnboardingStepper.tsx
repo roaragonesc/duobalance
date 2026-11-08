@@ -11,6 +11,7 @@ type OnboardingStepperProps = {
   currentStep: 1 | 2 | 3
 }
 
+/** Indica el paso actual y los completados, permitiendo volver a pasos anteriores disponibles. */
 export default function OnboardingStepper({
   currentStep,
 }: OnboardingStepperProps) {

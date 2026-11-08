@@ -30,6 +30,7 @@ import { AUTH_CALLBACK_PATH } from '../../features/auth/navigation'
 
 const createRouter = import.meta.env.MODE === 'pages-demo' ? createHashRouter : createBrowserRouter
 
+/** Catálogo de páginas, layouts y guards; usa rutas hash únicamente en la demo estática. */
 export const router = createRouter([
   { path: '/', element: <Navigate to="/login" replace /> },
   {

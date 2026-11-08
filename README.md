@@ -12,6 +12,8 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 - `pnpm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
   (`VITE_DATA_MODE=mock`), sin conectar al backend.
 - `pnpm run backend:dev`: iniciar la API Express en `http://127.0.0.1:3001`.
+- `pnpm run dev:api`: iniciar la web con la API real, sin mocks, en `http://localhost:5173`.
+- `pnpm run backend:check`: comprobar conexión, transacciones y categorías sin escribir datos.
 - `pnpm run build`: comprobar TypeScript y compilar web y API.
 - `pnpm run lint`: ejecutar Oxlint en ambas aplicaciones.
 - `pnpm run preview`: servir la compilación localmente.
@@ -25,7 +27,8 @@ El modo de desarrollo se configura con `VITE_DATA_MODE`:
 - `api`: usa el backend Express/MongoDB con cookies HttpOnly. Requiere iniciar
   la API y cargar sus datos seed según [apps/api/README.md](apps/api/README.md).
 
-Para usar el backend, define `VITE_DATA_MODE=api` y reinicia Vite. El build normal
+Para usar el backend, ejecuta `pnpm run dev:api` (prioriza API sobre la configuración
+mock local), o define `VITE_DATA_MODE=api` y reinicia Vite. El build normal
 usa API por defecto y rechaza empaquetar el modo mock. Node/MongoDB es el único
 backend del repositorio.
 La URI MongoDB solo se configura en `apps/api/.env`, nunca como variable `VITE_`.
@@ -55,8 +58,10 @@ aparece primero el último añadido; editarlo no cambia su orden de creación.
 
 La QA de aplicación vive en un framework específico
 separado. Aquí pueden vivir pruebas de desarrollador, como unitarias y tests
-de tooling. El validador arquitectónico tiene pruebas con `node:test`; no hay
-actualmente un runner de unitarias de aplicación declarado.
+de tooling. `npm run test:unit` ejecuta las unitarias del transporte, contratos y
+servicios HTTP y de la conexión transaccional con `node:test` y `tsx`, sin conectar
+a MongoDB ni levantar la API. `npm run typecheck:unit` comprueba esos tests y sus consumidores. El validador
+arquitectónico tiene sus propias pruebas con `node:test`.
 No duplicar las suites del framework externo.
 Este repositorio mantiene los principios Accessibility First y
 Testability First para que la aplicación siga siendo automatizable desde ese

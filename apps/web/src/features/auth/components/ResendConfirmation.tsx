@@ -31,6 +31,7 @@ function getResendErrorMessage(error: unknown) {
   )
 }
 
+/** Formulario de reenvío con validación, mensaje no enumerativo y espera de 60 segundos entre envíos. */
 export default function ResendConfirmation({
   initialEmail = '',
   redirectPath,

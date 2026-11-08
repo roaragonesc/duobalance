@@ -14,6 +14,7 @@ import { getInitials } from '../lib/initials'
 import { useActiveWorkspace } from '../features/spaces/workspaceContext'
 import { collectErrors, useValidatedForm } from '../hooks/useValidatedForm'
 
+/** Muestra la cuenta, permite editar el nombre y cerrar sesión; el correo permanece de solo lectura. */
 export default function Profile() {
   const { displayName, setDisplayName } = useActiveWorkspace()
   const auth = useAuth()

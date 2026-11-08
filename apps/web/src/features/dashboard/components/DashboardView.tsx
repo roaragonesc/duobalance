@@ -16,6 +16,7 @@ type DashboardViewProps = {
   onRetry: () => void
 }
 
+/** Placeholder del resumen que anuncia carga y respeta la reducción de movimiento. */
 function DashboardSkeleton() {
   return (
     <div role="status" aria-label="Cargando resumen del mes">
@@ -34,6 +35,7 @@ function DashboardSkeleton() {
   )
 }
 
+/** Compone indicadores, categorías y últimos gastos, gestionando carga, error y mes sin movimientos. */
 export default function DashboardView({
   state,
   month,
@@ -86,6 +88,7 @@ export default function DashboardView({
   )
 }
 
+/** Avisa de que falta incorporar la pareja y enlaza a la configuración del espacio. */
 export function PartnerPendingBanner() {
   return (
     <aside

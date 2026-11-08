@@ -6,6 +6,7 @@ type PasswordRequirementsProps = {
   password: string
 }
 
+/** Muestra las reglas de contraseña y comunica cuáles están cumplidas o pendientes. */
 export default function PasswordRequirements({
   id,
   password,

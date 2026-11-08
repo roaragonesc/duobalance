@@ -6,6 +6,7 @@ type LogoProps = {
   className?: string
 }
 
+/** Muestra la marca con la variante adecuada al fondo y texto alternativo DuoBalance. */
 export default function Logo({ tone, className = '' }: LogoProps) {
   return (
     <img

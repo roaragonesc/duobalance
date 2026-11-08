@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import * as schema from '../validators/finance.js'
 
+/** Envuelve un esquema como contenido JSON de una respuesta OpenAPI. */
 const json = (value: object) => ({ 'application/json': { schema: value } })
 const security = [{ session: [] }]
 const error = { description: 'Error JSON {error:{code,message,fields?}}; no contiene datos internos.' }
@@ -9,8 +10,11 @@ const documentId = { type: 'string', pattern: '^[a-f0-9]{24}$' }
 const date = { type: 'string', format: 'date' }
 const cents = { type: 'integer', minimum: 1, maximum: 1000000000 }
 const timestamps = { createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' } }
+/** Define un objeto documentado con todas sus propiedades obligatorias. */
 const object = (properties: Record<string, object>) => ({ type: 'object', properties, required: Object.keys(properties) })
+/** Define una lista cuyos elementos siguen el esquema indicado. */
 const array = (items: object) => ({ type: 'array', items })
+/** Referencia un esquema público del catálogo OpenAPI. */
 const reference = (name: string) => ({ $ref: `#/components/schemas/${name}` })
 const pending = object({ amountCents: { type: 'integer', minimum: 0 }, debtor: { enum: ['me', 'partner', null] } })
 export const financeSchemas = {
@@ -30,6 +34,7 @@ export const financeSchemas = {
     status: { enum: ['pending', 'accepted', 'rejected'] }, expiresAt: { type: 'string', format: 'date-time' }, ...timestamps }),
   PendingBalance: pending,
 }
+/** Selecciona el esquema de respuesta documentado; conserva una descripción genérica donde no hay forma específica. */
 function resultSchema(description: string): object {
   for (const [key, name] of [
     ['spaces', 'Space'], ['space', 'Space'], ['categories', 'Category'], ['category', 'Category'],
@@ -61,9 +66,11 @@ const filter = [
   { in: 'query', name: 'kind', schema: { type: 'string', enum: ['shared', 'individual'] } },
   { in: 'query', name: 'categoryId', schema: resourceId.schema },
 ]
+/** Construye la documentación de una lectura autenticada con sus parámetros y errores posibles. */
 const get = (description: string, parameters: object[] = []) => ({
   security, parameters, responses: { 200: { description, content: json(resultSchema(description)) }, ...failures },
 })
+/** Documenta una mutación con origen, CSRF, entrada Zod y respuesta con contenido o 204. */
 const write = (description: string, input: z.ZodType | null, parameters: object[] = [], status = 200) => ({
   security, parameters: [...parameters, origin, csrf],
   ...(input ? { requestBody: { required: true, content: json(z.toJSONSchema(input, { unrepresentable: 'any' })) } } : {}),

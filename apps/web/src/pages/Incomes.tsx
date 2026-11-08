@@ -13,6 +13,7 @@ import { useAsyncData } from '../hooks/useAsyncData'
 import { useConfirmDelete } from '../hooks/useConfirmDelete'
 import { useMonthParam } from '../hooks/useMonthParam'
 
+/** Carga ingresos mensuales y coordina la confirmación de borrado de movimientos propios. */
 export default function Incomes() {
   const { space } = useActiveWorkspace()
   const { month } = useMonthParam()

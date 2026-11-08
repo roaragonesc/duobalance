@@ -12,6 +12,7 @@ type AddLinkProps = {
   month: MonthKey
 }
 
+/** Enlace de creación que conserva el mes consultado para sugerir una fecha en el formulario. */
 export default function AddLink({ to, label, month }: AddLinkProps) {
   return (
     <Link

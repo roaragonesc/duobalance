@@ -7,7 +7,7 @@ import {
 } from '../../features/auth/navigation'
 import { hasAuthLinkError } from '../../features/auth/services/authErrors'
 
-// The provider validates the session; the API authorizes access to each resource.
+/** Protege rutas por sesión y conserva el destino al ir al login; la API autoriza cada recurso. */
 export default function ProtectedRoute() {
   const auth = useAuth()
   const location = useLocation()

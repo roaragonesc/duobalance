@@ -10,6 +10,7 @@ type CategoryBreakdownProps = {
   totalCents: number
 }
 
+/** Ordena gastos por importe y muestra su reparto en un gráfico decorativo y una tabla accesible. */
 export default function CategoryBreakdown({
   categories,
   totalCents,

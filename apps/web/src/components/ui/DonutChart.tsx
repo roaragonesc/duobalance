@@ -15,7 +15,7 @@ type DonutChartProps = {
   size?: 'md' | 'sm'
 }
 
-// Decorative ring; the screen must show the same data as text or a table.
+/** Dibuja un anillo decorativo con segmentos y total; la pantalla debe ofrecer también los datos como texto. */
 export default function DonutChart({
   segments,
   total,

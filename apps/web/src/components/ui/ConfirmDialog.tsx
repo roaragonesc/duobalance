@@ -12,8 +12,7 @@ type ConfirmDialogProps = {
   onCancel: () => void
 }
 
-// Native modal <dialog>: traps focus, closes with Escape and returns focus
-// to the element that opened it.
+/** Confirma acciones destructivas en un diálogo modal con foco nativo, cancelación y estado pendiente/error. */
 export default function ConfirmDialog({
   open,
   title,

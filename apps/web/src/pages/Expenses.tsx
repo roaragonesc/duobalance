@@ -15,6 +15,7 @@ import { useAsyncData } from '../hooks/useAsyncData'
 import { useConfirmDelete } from '../hooks/useConfirmDelete'
 import { useMonthParam } from '../hooks/useMonthParam'
 
+/** Carga los gastos mensuales y coordina su borrado confirmado, recarga y mensajes de resultado. */
 export default function Expenses() {
   const { space } = useActiveWorkspace()
   const { month } = useMonthParam()

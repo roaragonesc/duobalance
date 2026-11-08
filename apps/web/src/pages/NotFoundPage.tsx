@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 
+/** Explica una ruta inexistente y ofrece volver al inicio. */
 export default function NotFoundPage() {
   return (
     <div className="space-y-6">

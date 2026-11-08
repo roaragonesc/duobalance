@@ -14,6 +14,7 @@ type AuthenticatedUser = {
 }
 const authenticated = new WeakMap<Request, AuthenticatedUser>()
 
+/** Autentica la cookie y comprueba expiración, confirmación y versión antes de registrar la sesión de la petición. */
 export const requireSession: RequestHandler = async (request, _response, next) => {
   const value = parse(request.headers.cookie ?? '')[sessionCookie]
   if (!value || !/^[a-f0-9]{64}$/.test(value)) {
@@ -29,12 +30,14 @@ export const requireSession: RequestHandler = async (request, _response, next) =
   next()
 }
 
+/** Obtiene la identidad validada por requireSession; falla si la ruta omitió ese middleware. */
 export function currentSession(request: Request): AuthenticatedUser {
   const session = authenticated.get(request)
   if (!session) throw new Error('La ruta necesita requireSession.')
   return session
 }
 
+/** Rechaza un token CSRF incorrecto antes de ejecutar el handler de la mutación. */
 export const requireCsrf: RequestHandler = (request, _response, next) => {
   const value = request.get('X-CSRF-Token')
   if (!value || value.length > 128 || !matchesHash(value, currentSession(request).csrfHash)) {

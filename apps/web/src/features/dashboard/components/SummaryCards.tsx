@@ -11,6 +11,7 @@ import { getMonthName, shiftMonth, type MonthKey } from '../../../lib/month'
 import type { DashboardSummary, PendingBalance } from '../types'
 import { IconTile, StatCard } from '../../../components/ui/panel'
 
+/** Compara el gasto con el mes anterior cuando existen datos de referencia. */
 function MonthComparison({
   totalCents,
   previousCents,
@@ -33,6 +34,7 @@ function MonthComparison({
   )
 }
 
+/** Describe si las cuentas están al día o qué miembro tiene deuda pendiente. */
 export function PendingStatus({ pending }: { pending: PendingBalance }) {
   if (pending.debtor === null || pending.amountCents === 0) {
     return (
@@ -54,6 +56,7 @@ type SummaryCardsProps = {
   month: MonthKey
 }
 
+/** Tarjetas de gasto total, aportaciones de ambos miembros y deuda mensual. */
 export default function SummaryCards({ summary, month }: SummaryCardsProps) {
   const { totalCents } = summary
   return (

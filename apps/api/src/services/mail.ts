@@ -6,6 +6,7 @@ import type { Environment } from '../config/environment.js'
 export type MailMessage = { to: string; subject: string; text: string }
 export type Mailer = (message: MailMessage) => Promise<void>
 
+/** Crea un buzón JSON local con enlaces de confirmación/recuperación; no envía correo ni admite producción. */
 export function developmentMailer(env: Environment): Mailer {
   if (env.NODE_ENV === 'production') throw new Error('El correo local no está permitido en producción.')
   const directory = resolve(env.MAIL_DIRECTORY)

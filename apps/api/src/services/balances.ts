@@ -4,6 +4,7 @@ import { memberSpace, mutateSpace } from '../repositories/finance.js'
 import { allocation, pending, safeSum } from './calculations.js'
 import { ApiError } from '../utils/ApiError.js'
 
+/** Calcula la deuda a favor del creador usando repartos históricos; el acumulado descuenta liquidaciones. */
 export async function debt(spaceId: string, ownerId: string, until: string, session?: ClientSession, onlyMonth?: string) {
   const expenses = await Expense.find({
     spaceId, kind: 'shared', date: onlyMonth ? { $gte: `${onlyMonth}-01`, $lte: `${onlyMonth}-31` } : { $lte: `${until}-31` },
@@ -19,6 +20,7 @@ export async function debt(spaceId: string, ownerId: string, until: string, sess
   return total
 }
 
+/** Compone balance mensual, deuda acumulada, contribuciones e historial desde la perspectiva del usuario. */
 export async function balance(userId: string, spaceId: string, month: string) {
   const space = await memberSpace(spaceId, userId)
   const ownerId = space.createdBy.toString()
@@ -44,6 +46,10 @@ export async function balance(userId: string, spaceId: string, month: string) {
   }
 }
 
+/**
+ * Registra un pago manual y deriva deudor y acreedor dentro de la transacción.
+ * Impide superar la deuda a fecha del pago, fechas futuras y pagos anteriores a otros registrados.
+ */
 export async function settle(userId: string, spaceId: string, input: { amountCents: number; date: string; note: string | null }) {
   const today = new Date().toISOString().slice(0, 10)
   if (input.date > today) throw new ApiError(400, 'future_settlement', 'La liquidación no puede ser futura.')

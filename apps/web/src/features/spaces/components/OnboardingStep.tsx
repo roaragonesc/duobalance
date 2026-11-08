@@ -10,6 +10,7 @@ type OnboardingStepProps = {
   children: ReactNode
 }
 
+/** Compone un paso de configuración con progreso, ilustración, explicación y contenido del formulario. */
 export default function OnboardingStep({
   step,
   title,

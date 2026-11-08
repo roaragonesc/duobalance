@@ -2,6 +2,7 @@ type FormAlertProps = {
   message: string | null
 }
 
+/** Presenta y anuncia el error general del formulario; no renderiza contenido si no hay mensaje. */
 export default function FormAlert({ message }: FormAlertProps) {
   if (!message) return null
 

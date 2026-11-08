@@ -1,3 +1,4 @@
+/** Ilustración decorativa de creación del hogar compartido, sin contenido accesible adicional. */
 export default function HouseIllustration() {
   return (
     <svg

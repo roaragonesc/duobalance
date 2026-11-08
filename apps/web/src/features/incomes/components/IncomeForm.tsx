@@ -15,6 +15,7 @@ type IncomeFormProps = {
   getErrorMessage: (error: unknown) => string
 }
 
+/** Formulario de ingreso propio con concepto, céntimos y fecha validados antes del envío. */
 export default function IncomeForm({
   initialValues,
   submitLabel,

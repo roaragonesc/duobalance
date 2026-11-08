@@ -1,5 +1,6 @@
 import type { SVGProps } from 'react'
 
+/** Base SVG decorativa; el control que la contiene aporta su propio nombre accesible. */
 function Icon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -16,6 +17,7 @@ function Icon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de correo electrónico. */
 export function MailIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -25,6 +27,7 @@ export function MailIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de acceso protegido. */
 export function LockIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -35,6 +38,7 @@ export function LockIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de perfil individual. */
 export function UserIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -44,6 +48,7 @@ export function UserIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de mostrar contraseña. */
 export function EyeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -53,6 +58,7 @@ export function EyeIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de ocultar contraseña. */
 export function EyeOffIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -63,6 +69,7 @@ export function EyeOffIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de envío. */
 export function SendIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -72,6 +79,7 @@ export function SendIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Marca decorativa de confirmación. */
 export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -80,6 +88,7 @@ export function CheckIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Flecha decorativa para volver. */
 export function ArrowLeftIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -89,6 +98,7 @@ export function ArrowLeftIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Flecha decorativa para avanzar. */
 export function ArrowRightIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -98,6 +108,7 @@ export function ArrowRightIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Marca circular decorativa de requisito cumplido. */
 export function CheckCircleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props} stroke="none">
@@ -112,6 +123,7 @@ export function CheckCircleIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Círculo decorativo de requisito pendiente. */
 export function CircleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -120,6 +132,7 @@ export function CircleIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de hogar o espacio. */
 export function HomeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -130,6 +143,7 @@ export function HomeIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de balance o reparto. */
 export function ScaleIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -143,6 +157,7 @@ export function ScaleIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de indicadores financieros. */
 export function BarsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -153,6 +168,7 @@ export function BarsIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de información contextual. */
 export function InfoIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true" focusable="false" {...props}>
@@ -163,6 +179,7 @@ export function InfoIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de tarjeta o pago. */
 export function CardIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -173,6 +190,7 @@ export function CardIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de renovación. */
 export function RefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -184,6 +202,7 @@ export function RefreshIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de miembros o pareja. */
 export function UsersIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -195,6 +214,7 @@ export function UsersIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Indicador decorativo de navegación anterior. */
 export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -203,6 +223,7 @@ export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Indicador decorativo de navegación siguiente. */
 export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -211,6 +232,7 @@ export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de fecha o mes. */
 export function CalendarIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -222,6 +244,7 @@ export function CalendarIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de creación. */
 export function PlusIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -230,6 +253,7 @@ export function PlusIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Flecha decorativa de subida. */
 export function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -238,6 +262,7 @@ export function ArrowUpIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Flecha decorativa de bajada. */
 export function ArrowDownIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -246,6 +271,7 @@ export function ArrowDownIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de compra. */
 export function CartIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -256,6 +282,7 @@ export function CartIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de alimentación. */
 export function UtensilsIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -265,6 +292,7 @@ export function UtensilsIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de transporte. */
 export function CarIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -277,6 +305,7 @@ export function CarIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de conectividad o suministros. */
 export function WifiIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -288,6 +317,7 @@ export function WifiIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de actividad física. */
 export function DumbbellIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -299,6 +329,7 @@ export function DumbbellIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de concepto o categoría. */
 export function TagIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -308,6 +339,7 @@ export function TagIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de edición. */
 export function PencilIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -317,6 +349,7 @@ export function PencilIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de eliminación. */
 export function TrashIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -326,6 +359,7 @@ export function TrashIcon(props: SVGProps<SVGSVGElement>) {
     </Icon>
   )
 }
+/** Icono decorativo de ingresos o cartera. */
 export function WalletIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -335,6 +369,7 @@ export function WalletIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de ingresos laborales. */
 export function BriefcaseIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -344,6 +379,7 @@ export function BriefcaseIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de pago entre miembros. */
 export function SwapIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -352,6 +388,7 @@ export function SwapIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de historial. */
 export function HistoryIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -361,6 +398,7 @@ export function HistoryIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de documento o movimiento. */
 export function DocumentIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -370,6 +408,7 @@ export function DocumentIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** Icono decorativo de cierre de sesión. */
 export function LogoutIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>

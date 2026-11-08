@@ -11,9 +11,11 @@ import {
 } from '../features/auth/navigation'
 import {
   getAuthLinkError,
+  getAuthErrorMessage,
   toAuthLinkError,
   type AuthLinkError,
 } from '../features/auth/services/authErrors'
+import { HttpError } from '../services/api/http'
 import {
   confirmEmail,
   type EmailConfirmationType,
@@ -59,6 +61,7 @@ const primaryClassName =
 const secondaryClassName =
   'mt-8 inline-flex items-center gap-3 rounded-sm text-[19px] font-medium text-navy hover:underline'
 
+/** Confirma el correo por clic explícito y dirige al espacio adecuado, mostrando errores recuperables. */
 export default function AuthCallback() {
   const auth = useAuth()
   const navigate = useNavigate()
@@ -68,13 +71,15 @@ export default function AuthCallback() {
   )
   const [linkError, setLinkError] = useState<AuthLinkError | null>(params.error)
   const [isConfirming, setIsConfirming] = useState(false)
+  const [confirmationError, setConfirmationError] = useState<string | null>(null)
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null)
+  const [attempt, setAttempt] = useState(0)
   const userId = auth.status === 'authenticated' ? auth.session.user.id : null
 
   useEffect(() => {
     if (!userId || linkError) return
     let active = true
     getCurrentSpaceId(userId)
-      .catch(() => null)
       .then((spaceId) => {
         if (!active) return
         const target =
@@ -87,19 +92,29 @@ export default function AuthCallback() {
               : '/onboarding'
         navigate(target, { replace: true })
       })
+      .catch(() => {
+        if (!active) return
+        console.error('No se pudo consultar el espacio tras la autenticación.')
+        setWorkspaceError('No se ha podido cargar tu espacio. Inténtalo de nuevo.')
+      })
     return () => {
       active = false
     }
-  }, [userId, linkError, params.next, navigate])
+  }, [userId, linkError, params.next, navigate, attempt])
 
   // Explicit click so link scanners in email clients cannot consume the token.
   async function confirm() {
     if (isConfirming || !params.tokenHash || !params.type) return
     setIsConfirming(true)
+    setConfirmationError(null)
     try {
       await confirmEmail(params.tokenHash, params.type)
     } catch (error) {
-      setLinkError(toAuthLinkError(error))
+      if (error instanceof HttpError && ['invalid_token', 'token_expired'].includes(error.code)) {
+        setLinkError(toAuthLinkError(error))
+      } else {
+        setConfirmationError(getAuthErrorMessage(error, 'No se ha podido confirmar el correo. Inténtalo de nuevo.'))
+      }
       setIsConfirming(false)
     }
   }
@@ -110,6 +125,19 @@ export default function AuthCallback() {
       ? 'invalid'
       : null)
 
+  if (workspaceError) {
+    return (
+      <AuthLightCard title="No se ha podido cargar tu espacio" description="Comprueba la conexión e inténtalo de nuevo.">
+        <FormAlert message={workspaceError} />
+        <button type="button" className={primaryClassName} onClick={() => {
+          setWorkspaceError(null)
+          setAttempt((value) => value + 1)
+        }}>
+          Reintentar
+        </button>
+      </AuthLightCard>
+    )
+  }
   if (error) {
     const { title, description } = LINK_ERROR_COPY[error]
     return (
@@ -132,7 +160,7 @@ export default function AuthCallback() {
         description="Pulsa el botón para activar tu cuenta de DuoBalance."
       >
         <title>{`${title} | DuoBalance`}</title>
-        <FormAlert message={params.type ? null : 'Este enlace de confirmación no es válido.'} />
+        <FormAlert message={params.type ? confirmationError : 'Este enlace de confirmación no es válido.'} />
         <button
           type="button"
           onClick={confirm}

@@ -6,6 +6,7 @@ import App from '../src/app/App.tsx'
 import { DemoPanel } from './DemoPanel'
 import { syncSharedMock } from './sharedClient'
 
+/** Prepara el almacenamiento ficticio y monta app/panel de demo, mostrando fallos de inicialización. */
 async function start() {
   const root = createRoot(document.getElementById('root')!)
   try {

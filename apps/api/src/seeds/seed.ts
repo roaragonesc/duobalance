@@ -17,8 +17,10 @@ const sourceSchema = z.object({
   incomes: z.array(z.object({ description: z.string(), amountCents: z.number().int().positive(), by: z.enum(['A', 'B']) })),
   categories: z.array(z.object({ key: z.string(), name: z.string(), icon: z.string(), color: z.string() })),
 })
+/** Produce IDs deterministas para que repetir el seed no duplique sus entidades. */
 const objectId = (key: string) => new mongoose.Types.ObjectId(createHash('sha256').update(`duobalance-demo-v1:${key}`).digest('hex').slice(0, 24))
 
+/** Inserta fixtures ficticias de forma idempotente y transaccional sin sobrescribir cuentas o historial existentes. */
 export async function seed(password: string) {
   if (!/^(development|test)$/.test(process.env.NODE_ENV ?? 'development') ||
       !/^duobalance_(?:dev|test)(?:_[a-z0-9]+)?$/.test(mongoose.connection.name)) {
@@ -71,6 +73,7 @@ export async function seed(password: string) {
     const previous = new Date(current)
     previous.setUTCMonth(previous.getUTCMonth() - 1)
     const months = [current, previous].map((value) => value.toISOString().slice(0, 7))
+    /** Distribuye fechas del fixture por mes sin introducir movimientos futuros. */
     const day = (month: string, index: number) => {
       const date = `${month}-${String(Math.max(1, 28 - index * 4)).padStart(2, '0')}`
       return date > today ? today : date

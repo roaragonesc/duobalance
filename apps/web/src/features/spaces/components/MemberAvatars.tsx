@@ -9,6 +9,7 @@ type MemberAvatarsProps = {
 const avatarClassName =
   'flex size-12 items-center justify-center rounded-full text-[16px] font-bold'
 
+/** Presenta iniciales y nombres accesibles de los miembros que existen en el espacio. */
 export default function MemberAvatars({
   displayName,
   memberCount,

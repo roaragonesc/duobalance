@@ -47,7 +47,7 @@ function walk(root: string, directory: string): string[] {
 }
 
 export function collectFiles(root: string): string[] {
-  const nested = ['apps/web/src', 'apps/web/demo', 'apps/api/src', 'packages', 'scripts', 'shared']
+  const nested = ['apps/web/src', 'apps/web/demo', 'apps/web/tests', 'apps/api/src', 'apps/api/tests', 'packages', 'scripts', 'shared']
     .flatMap((directory) => walk(root, path.join(root, directory)))
   const configs = ['', 'apps/web', 'apps/api'].flatMap((directory) => {
     const absolute = path.join(root, directory)
@@ -94,6 +94,8 @@ function ownership(file: string): Pick<Entry, 'owner' | 'responsibility'> {
     return { owner: `Web / ${layer}`, responsibility: responsibilities[layer] ?? 'Entrada o recurso web' }
   }
   if (file.startsWith('apps/web/demo/')) return { owner: 'Web / demo', responsibility: 'Adaptador o infraestructura mock/demo' }
+  if (file.startsWith('apps/web/tests/')) return { owner: 'Web / unitarias', responsibility: 'Pruebas de desarrollador del cliente API y contratos' }
+  if (file.startsWith('apps/api/tests/')) return { owner: 'API / unitarias', responsibility: 'Pruebas de desarrollador sin conexiones externas' }
   if (file.startsWith('packages/')) return { owner: `Contrato / ${file.split('/')[1]}`, responsibility: 'Contrato público o esquema seguro compartido' }
   if (file.startsWith('scripts/')) return { owner: 'Tooling', responsibility: file.includes('.test.') ? 'Pruebas unitarias del validador' : 'Gobierno y verificación arquitectónica' }
   if (file.startsWith('shared/')) return { owner: 'Datos ficticios', responsibility: 'Fixture común a demo y seed' }
@@ -291,6 +293,11 @@ export function analyze(root: string): { entries: Entry[]; violations: Violation
         for (const target of entry.dependencies) {
           const web = entry.file.startsWith('apps/web/')
           const backend = entry.file.startsWith('apps/api/')
+          if ((entry.file.startsWith('apps/web/src/') && target.startsWith('apps/web/tests/')) ||
+              (entry.file.startsWith('apps/web/demo/') && target.startsWith('apps/web/tests/')) ||
+              (entry.file.startsWith('apps/api/src/') && target.startsWith('apps/api/tests/'))) {
+            report(entry.file, 'developer-test-boundary', target, 'Las unitarias consumen código de aplicación, nunca al revés.')
+          }
           if ((web && target.startsWith('apps/api/')) || (backend && target.startsWith('apps/web/')) ||
               (entry.file.startsWith('packages/') && target.startsWith('apps/'))) {
             report(entry.file, 'workspace-boundary', target, 'Consumir contratos compartidos; no importar la implementación de otra aplicación.')

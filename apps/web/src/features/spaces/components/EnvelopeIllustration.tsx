@@ -1,3 +1,4 @@
+/** Ilustración decorativa del paso de invitación a la pareja. */
 export default function EnvelopeIllustration() {
   return (
     <svg

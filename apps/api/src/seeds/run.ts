@@ -3,8 +3,10 @@ import { resolve } from 'node:path'
 import { parseEnv } from 'node:util'
 import mongoose from 'mongoose'
 import { readEnvironment } from '../config/environment.js'
+import { connectDatabase } from '../config/database.js'
 import { seed } from './seed.js'
 
+/** Carga exclusivamente el entorno privado y ejecuta el seed autorizado en una base de desarrollo. */
 async function main() {
   const file = resolve('.env')
   if (!existsSync(file)) {
@@ -23,8 +25,7 @@ async function main() {
   }
   if (env.NODE_ENV !== 'development') throw new Error('Este comando solo permite desarrollo.')
   if (!process.env.SEED_PASSWORD) throw new Error('Falta SEED_PASSWORD en apps/api/.env.')
-  mongoose.set('bufferCommands', false)
-  await mongoose.connect(env.MONGODB_URI, { dbName: env.MONGODB_DATABASE, serverSelectionTimeoutMS: 15000, autoIndex: false })
+  await connectDatabase(env)
   console.info('Conexión de desarrollo verificada.')
   const counts = await seed(process.env.SEED_PASSWORD)
   console.info('Colecciones y cantidades verificadas:', counts)

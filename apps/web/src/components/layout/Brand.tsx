@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 
+/** Marca textual que enlaza al inicio con un nombre accesible explícito. */
 export default function Brand() {
   return (
     <Link

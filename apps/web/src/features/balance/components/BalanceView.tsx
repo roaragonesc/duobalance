@@ -36,6 +36,7 @@ type BalanceViewProps = {
   onRetryHistory: () => void
 }
 
+/** Explica quién debe a quién y ofrece registrar un pago cuando existe deuda pendiente. */
 function WhoOwes({ pending, partnerLabel }: { pending: PendingBalance; partnerLabel: string }) {
   const settled = pending.debtor === null || pending.amountCents === 0
   return (
@@ -75,6 +76,7 @@ function WhoOwes({ pending, partnerLabel }: { pending: PendingBalance; partnerLa
   )
 }
 
+/** Presenta ingresos, gastos compartidos y saldo del mes en una lista de definiciones. */
 function MonthSummary({ summary, month }: { summary: BalanceMonth['summary']; month: MonthKey }) {
   const rows = [
     { label: 'Ingresos', value: summary.incomesCents },
@@ -101,6 +103,7 @@ function MonthSummary({ summary, month }: { summary: BalanceMonth['summary']; mo
   )
 }
 
+/** Compone el balance mensual y las pestañas de liquidaciones, con estados de carga, error y ausencia de datos. */
 export default function BalanceView({
   state,
   history,

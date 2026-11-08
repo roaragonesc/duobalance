@@ -2,6 +2,7 @@ import { RouterProvider } from 'react-router/dom'
 import AuthProvider from './providers/AuthProvider'
 import { router } from './router/router'
 
+/** Monta autenticación y router e incluye el enlace accesible para saltar al contenido principal. */
 export default function App() {
   return (
     <AuthProvider>

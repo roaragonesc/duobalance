@@ -39,7 +39,7 @@ function getSaveErrorMessage(error: unknown) {
   return getIncomeErrorMessage(error, 'No se ha podido guardar el ingreso. Inténtalo de nuevo.')
 }
 
-// Creates an income or, with an :incomeId, edits one of the user's own.
+/** Crea o edita un ingreso propio y vuelve al listado del mes correspondiente a su fecha. */
 export default function IncomeEditor() {
   const { incomeId } = useParams()
   const { space } = useActiveWorkspace()

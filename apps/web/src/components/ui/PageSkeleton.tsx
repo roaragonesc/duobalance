@@ -1,6 +1,6 @@
 import { panelClassName } from './panel'
 
-// Loading placeholder of the monthly screens: four cards and a content block.
+/** Placeholder de pantallas mensuales que anuncia la carga y respeta la reducción de movimiento. */
 export default function PageSkeleton({ label }: { label: string }) {
   return (
     <div role="status" aria-label={label}>

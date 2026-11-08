@@ -238,6 +238,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.5
+      zod:
+        specifier: ^4.1.0
+        version: 4.6.7
     devDependencies:
       '@types/node':
         specifier: ^24.19.2
@@ -254,6 +257,9 @@ importers:
       oxlint:
         specifier: ^1.89.0
         version: 1.92.0
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.15
       typescript:
         specifier: ~7.0.2
         version: 7.0.2

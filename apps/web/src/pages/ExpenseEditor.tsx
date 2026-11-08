@@ -46,7 +46,7 @@ function getSaveErrorMessage(error: unknown) {
   )
 }
 
-// Creates a new expense or, with an :expenseId, edits one of the user's own.
+/** Crea un gasto o carga uno propio para editarlo, conservando el mes y comprobando el permiso de edición. */
 export default function ExpenseEditor() {
   const { expenseId } = useParams()
   const { space } = useActiveWorkspace()

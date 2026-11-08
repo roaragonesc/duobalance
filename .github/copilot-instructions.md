@@ -90,8 +90,8 @@ Toda la aplicación debe desarrollarse siguiendo los principios Accessibility Fi
 
 ## Estrategia de testing
 - Aquí pueden vivir pruebas de desarrollador, como unitarias y tests de tooling.
-  El tooling tiene `npm run test:architecture` con node:test; no hay un runner
-  de unitarias de aplicación declarado.
+  El tooling tiene `npm run test:architecture` con node:test. Cliente/servicios
+  HTTP tienen `npm run test:unit` y `npm run typecheck:unit` sin conexiones externas.
 - Mantener pruebas deterministas, centradas en comportamiento y sin esperas fijas.
 - Aplicar validación y autorización en la API Node, no solo en la interfaz.
 

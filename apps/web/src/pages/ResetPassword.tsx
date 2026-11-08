@@ -32,6 +32,7 @@ function getResetPasswordErrorMessage(error: unknown) {
   )
 }
 
+/** Valida una contraseña nueva desde el enlace de recuperación y vuelve al login tras invalidar la sesión. */
 export default function ResetPassword() {
   const auth = useAuth()
   const navigate = useNavigate()
@@ -46,8 +47,8 @@ export default function ResetPassword() {
       validate: validateResetPassword,
       onSubmit: async ({ password }) => {
         await updatePassword(password)
-        // Close the recovery session so the user signs in with the new password.
-        await signOut().catch(() => undefined)
+        // The API reset already clears cookies and invalidates all sessions.
+        if (!apiRecovery) await signOut()
         navigate('/login', { replace: true, state: SUCCESS_STATE })
       },
       getErrorMessage: getResetPasswordErrorMessage,

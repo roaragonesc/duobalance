@@ -11,7 +11,7 @@ type MonthPageHeaderProps = {
   showMonth?: boolean
 }
 
-// Header of the app screens: title, month selector and members.
+/** Cabecera de página con título, miembros del espacio y selector mensual opcional sincronizado con la URL. */
 export default function MonthPageHeader({
   title,
   description,

@@ -8,6 +8,7 @@ type AuthLightCardProps = {
   children: ReactNode
 }
 
+/** Tarjeta clara de confirmación/recuperación con marca, título, descripción y contenido. */
 export default function AuthLightCard({
   title,
   description,

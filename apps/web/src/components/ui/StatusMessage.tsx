@@ -3,6 +3,7 @@ type StatusMessageProps = {
   className?: string
 }
 
+/** Anuncia un mensaje informativo o de éxito sin interrumpir como un error. */
 export default function StatusMessage({
   message,
   className = 'mt-6',

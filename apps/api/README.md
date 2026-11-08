@@ -9,8 +9,8 @@ HTTP con cookies, modo `api` y proxy Vite; conserva el modo `mock` y Pages.
 Node/MongoDB es el único backend del repositorio.
 
 **No se ha conectado ni cargado Atlas**: falta `apps/api/.env` guardado en disco.
-El seed y los contratos se han probado contra un MongoDB real efímero local,
-no contra Atlas ni producción. No confundir esas dos comprobaciones.
+Las unitarias del cliente usan respuestas HTTP simuladas y contratos runtime;
+no demuestran conectividad ni comportamiento real de Atlas o producción.
 
 ## Arquitectura
 
@@ -19,10 +19,12 @@ no contra Atlas ni producción. No confundir esas dos comprobaciones.
 - `src/repositories/`: acceso a datos, autorización y transacciones del espacio.
 - `src/services/`: reglas de negocio, cálculos, autenticación y correo.
 - `src/controllers/`: contratos HTTP; `src/routes/`: rutas y middleware.
-- `src/config/`: entorno y OpenAPI 3.1.
+- `src/config/`: entorno, conexión con comprobación de transacciones y OpenAPI 3.1.
+- `src/check.ts`: diagnóstico de conexión y categorías globales, sin escrituras.
 - `src/seeds/`: carga idempotente desde `../../shared/mockData.json`.
 - `src/app.ts`: composición sin conexión implícita; `src/server.ts`: ciclo de vida.
 - `../web/src/services/api/`: cliente HTTP y provider de sesión.
+- `../web/src/services/api/contracts.ts`: esquemas Zod de respuestas consumidas.
 - `../web/src/features/`: servicios de cada funcionalidad que consumen la API.
 
 No se añaden repositorios/clases vacíos por cada entidad: se agrupan los
@@ -140,19 +142,38 @@ Errores: `{"error":{"code":"invalid_input","message":"Revisa los campos enviados
 
 ## Configuración privada y arranque
 
+### MongoDB Atlas de desarrollo
+
+1. Crea un clúster de desarrollo con soporte de transacciones (gratuito si está
+   disponible). Usa una base aislada `duobalance_dev`, nunca datos reales.
+2. En Database Access crea un usuario con `readWrite` únicamente sobre esa base.
+   En Network Access permite tu IP actual, no acceso general `0.0.0.0/0`.
+3. En Connect → Drivers copia la URI `mongodb+srv://…` y completa usuario y
+   contraseña **solo en `apps/api/.env`**. Codifica caracteres especiales de
+   las credenciales para una URL y conserva las opciones de la URI de Atlas.
+   `MONGODB_DATABASE` elige la base aunque la URI no incluya su nombre.
+4. Elige `SEED_PASSWORD` ficticia para las cuentas de desarrollo. No uses
+   contraseñas personales ni pegues la URI, el archivo o sus valores en el chat.
+
+La plantilla no contiene una conexión Atlas real. Copiarla no configura el
+clúster; sustituye su alternativa local antes de ejecutar el seed.
+
 ```powershell
 pnpm install --frozen-lockfile
+# Solo si el archivo todavía no existe; no sobrescribas una configuración privada.
 Copy-Item apps\api\.env.example apps\api\.env
 # Edita apps\api\.env con la URI privada NUEVA de desarrollo y SEED_PASSWORD.
 pnpm run backend:build
 pnpm run backend:seed
+pnpm run backend:check
 pnpm run backend:dev
 # En otra terminal:
-$env:VITE_DATA_MODE='api'
-pnpm run dev
+pnpm run dev:api
 ```
 
 Frontend: `http://localhost:5173`; API: `http://127.0.0.1:3001/api/v1`.
+`Invoke-RestMethod http://localhost:5173/api/v1/health` comprueba también el
+proxy: debe devolver `status: ok` con el servidor conectado.
 Vite proxifica `/api` al backend. Producción necesita un reverse proxy equivalente.
 No se deben servir páginas HTML como fallback para rutas `/api`.
 
@@ -171,6 +192,9 @@ El servidor/seed no leen `.env.local` de la raíz. No colocar valores privados e
 La plantilla se ha limpiado de credenciales. Cualquier credencial expuesta debe
 rotarse antes de usarla. Se valida configuración sin imprimir sus valores.
 MongoDB requiere replica set para transacciones (Atlas lo proporciona).
+Servidor, seed y diagnóstico comprueban la topología al conectar y rechazan
+un MongoDB standalone. El diagnóstico no crea índices ni documentos; si faltan
+categorías, falla e indica ejecutar el seed en desarrollo.
 
 ## Seed idempotente
 
@@ -198,7 +222,6 @@ La transacción revierte los inserts si hay un conflicto. Nunca borra datos.
 Al cambiar de mes añade los meses que aún no existan, como los datos móviles del mock.
 El comando CLI solo permite `development` y una base `duobalance_dev…`.
 No ejecutar el seed sobre datos reales aunque la base tenga ese nombre.
-Ana/Luis son escenarios únicos por test, no cuentas seed mutables compartidas.
 
 ## Seguridad y correo
 
@@ -218,6 +241,10 @@ El adaptador de correo de desarrollo escribe JSON con enlaces reales al frontend
 en `.local-mail`. **Contiene tokens temporales**: no publicarlo ni adjuntarlo.
 Los fallos de escritura producen error; se puede reenviar la confirmación.
 La confirmación no inicia sesión automáticamente: redirige al login.
+Para probar registro/recuperación, abre el JSON más reciente del buzón local
+`apps/api/.local-mail` y visita su enlace en `http://localhost:5173`.
+La confirmación requiere un clic explícito para evitar consumir tokens por
+escáneres de correo. El reset invalida las sesiones y vuelve al login.
 
 Producción permanece bloqueada hasta integrar SMTP real, HTTPS/proxy, almacén
 distribuido de rate limiting, backups y validar la operación.
@@ -227,9 +254,16 @@ de gestión fuera de los diseños existentes.
 ## Tests y CI
 
 La QA de aplicación vive en un framework separado. Aquí pueden añadirse
-pruebas de desarrollador, como unitarias de reglas puras, cuando sean necesarias;
-actualmente no hay un runner de unitarias de aplicación declarado.
+pruebas de desarrollador, como unitarias de reglas puras, cuando sean necesarias.
+`npm run test:unit` ejecuta las unitarias del cliente HTTP y servicios web:
+contratos, cookies/CSRF, errores, categorías, identidad y deuda histórica.
+Incluye también unitarias del conector y rechazo de topologías sin transacciones,
+con Mongoose simulado en `tests/database.test.ts`.
+`npm run typecheck:unit` verifica sus tipos. No conecta a ninguna base ni
+sustituye verificar las operaciones financieras sobre MongoDB real.
 El tooling arquitectónico dispone de pruebas con `node:test`.
+La CI existente ejecuta las pruebas del tooling y builds; las nuevas unitarias
+se ejecutan localmente y no se modifica el workflow en esta fase.
 
 ## Verificación y límites
 

@@ -12,6 +12,7 @@ import type { SettlementInput } from '../features/balance/types'
 import { useActiveWorkspace } from '../features/spaces/workspaceContext'
 import { useAsyncData } from '../hooks/useAsyncData'
 
+/** Consulta la deuda actual y permite registrar un pago manual solo cuando existe saldo pendiente. */
 export default function RegisterSettlement() {
   const { space } = useActiveWorkspace()
   const navigate = useNavigate()

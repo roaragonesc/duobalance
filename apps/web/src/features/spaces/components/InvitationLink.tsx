@@ -10,6 +10,7 @@ type InvitationLinkProps = {
 const buttonClassName =
   'flex h-[54px] w-full items-center justify-center gap-3 rounded-[12px] text-[20px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy motion-reduce:transition-none'
 
+/** Muestra una invitación creada y permite copiarla o compartirla por correo sin enviarla desde el backend. */
 export default function InvitationLink({ url, email }: InvitationLinkProps) {
   const [copyStatus, setCopyStatus] = useState('')
 

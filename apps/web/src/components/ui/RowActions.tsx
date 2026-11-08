@@ -10,8 +10,7 @@ type RowActionsProps = {
   readOnlyNote: string
 }
 
-// Edit link and delete button of a table row; hidden when the user cannot
-// modify the row (the database enforces it too).
+/** Acciones accesibles de edición y borrado; muestra solo lectura cuando el usuario no puede modificar la fila. */
 export default function RowActions({
   label,
   editTo,

@@ -1,7 +1,10 @@
 import { financePaths, financeSchemas } from './financeOpenApi.js'
 
+/** Envuelve el esquema público de una operación en contenido application/json. */
 const json = (schema: object) => ({ 'application/json': { schema } })
+/** Referencia un componente del catálogo OpenAPI sin duplicar su definición. */
 const reference = (name: string) => ({ $ref: `#/components/schemas/${name}` })
+/** Describe una respuesta HTTP con un esquema de contenido opcional. */
 const response = (description: string, schema?: object) => ({
   description, ...(schema ? { content: json(schema) } : {}),
 })
@@ -16,7 +19,9 @@ const authenticated = [{ session: [] }]
 const csrfHeader = { in: 'header', name: 'X-CSRF-Token', required: true, schema: { type: 'string' } }
 const originHeader = { in: 'header', name: 'Origin', required: true,
   description: 'Debe coincidir exactamente con FRONTEND_ORIGIN.', schema: { type: 'string' } }
+/** Describe un cuerpo JSON obligatorio de entrada. */
 const body = (schema: object) => ({ required: true, content: json(schema) })
+/** Define un objeto de contrato sin propiedades adicionales y con campos obligatorios explícitos. */
 const object = (properties: Record<string, object>, required = Object.keys(properties)) => ({
   type: 'object', additionalProperties: false, properties, required,
 })
@@ -27,6 +32,7 @@ const password = { type: 'string', minLength: 8, maxLength: 128,
 const token = { type: 'string', pattern: '^[a-f0-9]{64}$' }
 const message = object({ message: { type: 'string' } })
 const profileResponse = object({ user: reference('User') })
+/** Documenta un POST con origen y, cuando es protegido, sesión y CSRF. */
 const post = (schema: object, success: number, result: object, protectedRoute = false) => ({
   parameters: [originHeader, ...(protectedRoute ? [csrfHeader] : [])],
   ...(protectedRoute ? { security: authenticated } : {}),
@@ -38,7 +44,7 @@ const post = (schema: object, success: number, result: object, protectedRoute = 
 export const openApi = {
   openapi: '3.1.0',
   info: { title: 'DuoBalance API — módulo inicial', version: '0.1.0',
-    description: 'Autenticación, perfiles, espacios, invitaciones, categorías, gastos, ingresos, balances y liquidaciones. Integración React API pendiente.' },
+    description: 'Autenticación, perfiles, espacios, invitaciones, categorías, gastos, ingresos, balances y liquidaciones. Cliente React integrado; configuración y verificación Atlas pendientes.' },
   servers: [{ url: '/api/v1' }],
   components: {
     securitySchemes: { session: { type: 'apiKey', in: 'cookie', name: 'duobalance-session' } },

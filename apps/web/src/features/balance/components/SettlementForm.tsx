@@ -22,6 +22,7 @@ type SettlementFormProps = {
   getErrorMessage: (error: unknown) => string
 }
 
+/** Formulario de pago manual parcial con importe limitado por deuda, fecha y nota opcional. */
 export default function SettlementForm({
   pending,
   partnerLabel,

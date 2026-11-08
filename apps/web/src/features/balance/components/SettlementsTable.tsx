@@ -14,6 +14,7 @@ type SettlementsTableProps = {
   onRetry: () => void
 }
 
+/** Tabla accesible del historial de pagos con identidad del pagador, carga, error y reintento. */
 export default function SettlementsTable({
   state,
   caption,

@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { requireSession, requireCsrf } from '../middlewares/session.js'
 import * as controller from '../controllers/finance.js'
 
+/** Agrupa endpoints financieros: todas las lecturas exigen sesión y las mutaciones también CSRF. */
 export const financeRoutes = Router()
 financeRoutes.use(requireSession)
 financeRoutes.use((request, response, next) => {

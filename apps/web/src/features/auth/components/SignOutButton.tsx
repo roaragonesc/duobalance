@@ -13,6 +13,7 @@ const variants = {
     'flex h-[56px] w-full items-center justify-center gap-3 rounded-[14px] border-2 border-red-600 bg-white px-8 text-[18px] font-semibold text-red-700 hover:bg-red-50 focus-visible:outline-navy sm:w-auto sm:min-w-[300px]',
 }
 
+/** Cierra la sesión con bloqueo de envíos repetidos y error visible; admite variante de perfil. */
 export default function SignOutButton({ className = '', variant = 'link' }: SignOutButtonProps) {
   const { signOut, isSigningOut, error } = useSignOut()
 

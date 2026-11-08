@@ -6,7 +6,7 @@ import {
   readAuthLocationState,
 } from '../../features/auth/navigation'
 
-// Login, registration and password recovery are only for signed-out users.
+/** Restringe páginas públicas de acceso a usuarios sin sesión y redirige a los autenticados. */
 export default function PublicOnlyRoute() {
   const auth = useAuth()
   const location = useLocation()

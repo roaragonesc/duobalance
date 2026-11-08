@@ -9,6 +9,7 @@ type EmptyStateProps = {
   action?: ReactNode
 }
 
+/** Explica la ausencia de datos con título, descripción y acción opcional de la pantalla. */
 export default function EmptyState({ id, icon, title, children, action }: EmptyStateProps) {
   return (
     <section

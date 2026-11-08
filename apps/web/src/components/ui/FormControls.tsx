@@ -5,6 +5,7 @@ export const fieldLabelClassName = 'mb-2 block text-left text-[18px] font-bold t
 export const controlClassName =
   'h-[52px] w-full rounded-[12px] border bg-white px-4 text-[17px] text-navy focus:outline-2 focus:outline-offset-0 focus:outline-navy'
 
+/** Anuncia el error de un campo y permite asociarlo al control mediante su ID. */
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null
   return (
@@ -23,6 +24,7 @@ type DateFieldProps = {
   onChange: (value: string) => void
 }
 
+/** Campo de fecha controlado con etiqueta visible, límite opcional y error accesible. */
 export function DateField({ id, label, value, max, error, onChange }: DateFieldProps) {
   const errorId = useId()
   return (
@@ -56,6 +58,7 @@ type SelectFieldProps = {
   children: ReactNode
 }
 
+/** Selector de formulario con etiqueta asociada, valor controlado y validación accesible. */
 export function SelectField({ id, label, value, error, onChange, children }: SelectFieldProps) {
   const errorId = useId()
   return (
@@ -90,6 +93,7 @@ type FilterSelectProps = {
   children: ReactNode
 }
 
+/** Selector accesible para filtrar listados sin gestionar ni duplicar su estado. */
 export function FilterSelect({ label, value, onChange, children }: FilterSelectProps) {
   const id = useId()
   return (

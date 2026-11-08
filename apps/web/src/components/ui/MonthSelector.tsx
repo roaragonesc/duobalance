@@ -14,6 +14,7 @@ type MonthSelectorProps = {
 const buttonClassName =
   'flex size-10 items-center justify-center rounded-full text-navy hover:bg-[#F1F7F9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy disabled:cursor-not-allowed disabled:opacity-35'
 
+/** Navega entre meses con botones accesibles, anuncia el mes y respeta el límite hacia el siguiente. */
 export default function MonthSelector({
   month,
   canGoNext,

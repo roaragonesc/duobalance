@@ -17,6 +17,7 @@ function getErrorMessage(error: unknown) {
   return getSpaceErrorMessage(error, 'No se ha podido cambiar el método de reparto. Inténtalo de nuevo.')
 }
 
+/** Cambia el reparto global para gastos nuevos y muestra confirmación o error sin alterar el histórico. */
 export default function SplitMethodForm({ current, onSubmit }: SplitMethodFormProps) {
   const [notice, setNotice] = useState<string | null>(null)
   const { values, formError, isSubmitting, setValue, handleSubmit } = useValidatedForm<{

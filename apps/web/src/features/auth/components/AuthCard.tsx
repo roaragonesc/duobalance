@@ -5,6 +5,7 @@ type AuthCardProps = {
   children?: ReactNode
 }
 
+/** Tarjeta de autenticación con título principal asociado y contenido aportado por la página. */
 export default function AuthCard({
   title,
   children,

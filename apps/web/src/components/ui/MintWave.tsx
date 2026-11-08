@@ -1,3 +1,4 @@
+/** Onda decorativa de marca, excluida de la lectura y del foco accesible. */
 export default function MintWave({ className = '' }: { className?: string }) {
   return (
     <svg

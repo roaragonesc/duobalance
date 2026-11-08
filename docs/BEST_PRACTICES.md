@@ -40,6 +40,7 @@
 - `npm run lint:arch` (alias compatible: `pnpm run check:architecture`)
 - `npm run inventory:update` al cambiar fuentes/imports/exports; revisar el diff
 - `npm run test:architecture` y `npm run typecheck:tooling` al cambiar el validador
+- `npm run test:unit` y `npm run typecheck:unit` para cliente/servicios HTTP
 - `pnpm run lint`
 - `pnpm run build`
 - `pnpm run build:demo` para cambios del demo o su bootstrap
@@ -55,6 +56,7 @@ verificación contra servicios reales.
 | --- | --- | --- |
 | Separar transporte y feature | `apps/web/src/services/api/http.ts` y servicios de features | Centraliza cookies, CSRF y errores sin mezclar UI y red |
 | Validar en runtime | `packages/shared-schemas/index.js` | Un tipo TypeScript no comprueba JSON externo |
+| Validar respuestas consumidas | `apps/web/src/services/api/contracts.ts` | Detecta payloads inválidos y protege cálculos con céntimos enteros |
 | Propiedad de persistencia | `apps/api/src/repositories/` | El navegador no debe importar modelos MongoDB |
 | Estados y foco accesibles | `TextField`, `FormAlert`, `ConfirmDialog` | Errores y acciones deben ser observables con teclado y lectores |
 | Composición de rutas | `apps/web/src/app/router/router.tsx` | Mantiene navegación y páginas separadas de negocio |

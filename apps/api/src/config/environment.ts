@@ -12,6 +12,7 @@ const schema = z.object({
 
 export type Environment = z.infer<typeof schema>
 
+/** Valida el entorno privado, el origen y la base aislada; bloquea producción y errores con valores sensibles. */
 export function readEnvironment(): Environment {
   const parsed = schema.safeParse(process.env)
   if (!parsed.success) {

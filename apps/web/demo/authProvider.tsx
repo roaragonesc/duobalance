@@ -17,6 +17,7 @@ function createAuthState(user: string | null, users: ReturnType<typeof useDemoSt
   return { status: 'authenticated', session }
 }
 
+/** Publica una sesión ficticia desde el estado local de demo sin consultar la API real. */
 export default function MockAuthProvider({ children }: { children: ReactNode }) {
   const { user, users } = useDemoState()
   const authState = useMemo(() => createAuthState(user, users), [user, users])

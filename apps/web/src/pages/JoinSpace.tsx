@@ -17,6 +17,7 @@ const primaryClassName =
 const secondaryClassName =
   'mt-8 inline-flex items-center gap-3 rounded-sm text-[19px] font-medium text-navy hover:underline'
 
+/** Gestiona el acceso por invitación, exige sesión y acepta el enlace únicamente tras un clic explícito. */
 export default function JoinSpace() {
   const auth = useAuth()
   const navigate = useNavigate()

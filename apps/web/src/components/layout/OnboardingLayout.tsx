@@ -14,6 +14,7 @@ function getBackTo(handle: unknown): string | undefined {
   return typeof backTo === 'string' ? backTo : undefined
 }
 
+/** Compone el alta del espacio con marca, vuelta según la ruta, cierre de sesión y contenido del paso. */
 export default function OnboardingLayout() {
   const backTo = useMatches()
     .map((match) => getBackTo(match.handle))

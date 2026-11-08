@@ -23,6 +23,7 @@ function getLoginErrorMessage(error: unknown) {
   )
 }
 
+/** Formulario de acceso que valida credenciales y conserva avisos y destino previo a la autenticación. */
 export default function Login() {
   const { notice, from } = readAuthLocationState(useLocation().state)
   // PublicOnlyRoute redirects once the provider reports the new session.

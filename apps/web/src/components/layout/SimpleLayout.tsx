@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router'
 import Brand from './Brand'
 
+/** Layout básico con marca y contenido principal para páginas sin navegación privada. */
 export default function SimpleLayout() {
   return (
     <div className="flex min-h-dvh flex-col bg-ice">

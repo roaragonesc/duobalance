@@ -5,6 +5,7 @@ function arc(degrees: number) {
   return `${(degrees / 360) * CIRCUMFERENCE} ${CIRCUMFERENCE}`
 }
 
+/** Fondo decorativo de las pantallas de autenticación, oculto a tecnologías de asistencia. */
 export default function AuthBackdrop() {
   return (
     <div

@@ -27,6 +27,7 @@ type IncomesViewProps = {
   onDelete: (income: Income) => void
 }
 
+/** Representa la proporción de ingresos de cada miembro mediante gráfico y leyenda textual. */
 function ContributionShare({ data, partnerLabel }: { data: IncomeMonth; partnerLabel: string }) {
   const members = [
     { id: 'me' as const, name: 'Tú', cents: data.myCents },
@@ -69,6 +70,7 @@ function ContributionShare({ data, partnerLabel }: { data: IncomeMonth; partnerL
   )
 }
 
+/** Listado mensual de ingresos con filtro por propietario, totales y gestión de movimientos propios. */
 export default function IncomesView({
   state,
   month,

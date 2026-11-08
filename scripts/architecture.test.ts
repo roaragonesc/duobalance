@@ -81,6 +81,18 @@ const sharedManifest = JSON.stringify({
 })
 
 const invalidCases: { name: string; rule: string; files: Record<string, string> }[] = [
+  { name: 'browser application cannot import developer tests', rule: 'developer-test-boundary', files: {
+    'apps/web/src/a.ts': "export * from '../tests/a.js'",
+    'apps/web/tests/a.ts': 'export const a = 1',
+  } },
+  { name: 'API application cannot import developer tests', rule: 'developer-test-boundary', files: {
+    'apps/api/src/a.ts': "export * from '../tests/a.js'",
+    'apps/api/tests/a.ts': 'export const a = 1',
+  } },
+  { name: 'demo cannot import developer tests', rule: 'developer-test-boundary', files: {
+    'apps/web/demo/a.ts': "export * from '../tests/a.js'",
+    'apps/web/tests/a.ts': 'export const a = 1',
+  } },
   { name: 'frontend cannot import backend even through a reexport', rule: 'workspace-boundary', files: {
     'apps/web/src/a.ts': "export * from '../../api/src/server.js'",
     'apps/api/src/server.ts': 'export const secret = 1',
@@ -144,6 +156,20 @@ const invalidCases: { name: string; rule: string; files: Record<string, string> 
     'apps/web/src/a.ts': "import fs from 'node:fs'",
   } },
 ]
+
+test('developer tests are inventoried and may consume their own application and Node runner', () => {
+  fixture({
+    'apps/web/src/a.ts': 'export const a = 1',
+    'apps/web/tests/a.test.ts': "import test from 'node:test'; import { a } from '../src/a.js'; test('a', () => a)",
+    'apps/api/src/a.ts': 'export const a = 1',
+    'apps/api/tests/a.test.ts': "import test from 'node:test'; import { a } from '../src/a.js'; test('a', () => a)",
+  }, (root) => {
+    const { entries, violations } = analyze(root)
+    assert.deepEqual(violations, [])
+    assert.equal(entries.filter((entry) => entry.file.includes('/tests/')).length, 2)
+    assert.deepEqual(checkInventory(entries, updateInventory(entries, emptyInventory)), [])
+  })
+})
 
 for (const { name, rule, files } of invalidCases) {
   test(name, () => fixture(files, (root) => {

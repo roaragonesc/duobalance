@@ -10,7 +10,7 @@ type TabsProps<T extends string> = {
   children: ReactNode
 }
 
-// WAI-ARIA tabs with automatic activation and arrow/Home/End navigation.
+/** Pestañas WAI-ARIA con panel asociado y selección por flechas, Inicio y Fin. */
 export default function Tabs<T extends string>({
   label,
   tabs,

@@ -4,6 +4,7 @@ type RetryPanelProps = {
   className?: string
 }
 
+/** Muestra un error anunciado y una acción explícita para volver a cargar los datos. */
 export default function RetryPanel({
   message,
   onRetry,

@@ -8,6 +8,7 @@ import { useActiveWorkspace } from '../features/spaces/workspaceContext'
 import { useAsyncData } from '../hooks/useAsyncData'
 import { useMonthParam } from '../hooks/useMonthParam'
 
+/** Carga el resumen del mes y saluda al usuario, mostrando la invitación pendiente cuando falta su pareja. */
 export default function Dashboard() {
   const { displayName, space } = useActiveWorkspace()
   const { month } = useMonthParam()

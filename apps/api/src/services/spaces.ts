@@ -5,20 +5,24 @@ import { memberSpace, missing, mutateSpace, ownerOnly } from '../repositories/fi
 import { ApiError } from '../utils/ApiError.js'
 import { createToken, hashToken } from '../utils/tokens.js'
 
+/** Crea un espacio con el usuario como único miembro y rechaza una segunda pertenencia. */
 export async function createSpace(userId: string, input: { name: string; splitMethod: 'equal' | 'proportional' }) {
   if (await Space.exists({ members: userId })) throw new ApiError(409, 'already_in_space', 'Ya perteneces a un espacio.')
   return Space.create({ ...input, createdBy: userId, members: [userId] })
 }
 
+/** Obtiene el espacio solo si el usuario pertenece a él. */
 export async function getSpace(userId: string, spaceId: string) {
   return memberSpace(spaceId, userId)
 }
 
+/** Devuelve nombres y correos de los miembros, sin credenciales ni tokens. */
 export async function members(userId: string, spaceId: string) {
   const space = await memberSpace(spaceId, userId)
   return User.find({ _id: { $in: space.members } }).select('name email')
 }
 
+/** Permite al creador cambiar nombre o reparto global sin alterar los snapshots de gastos existentes. */
 export async function updateSpace(userId: string, spaceId: string, input: { name?: string; splitMethod?: 'equal' | 'proportional' }) {
   return mutateSpace(spaceId, userId, async (space, session) => {
     ownerOnly(space, userId)
@@ -29,6 +33,7 @@ export async function updateSpace(userId: string, spaceId: string, input: { name
   })
 }
 
+/** Borra el espacio y sus invitaciones solo por su creador y si no existe historial financiero. */
 export async function deleteSpace(userId: string, spaceId: string) {
   return mutateSpace(spaceId, userId, async (space, session) => {
     ownerOnly(space, userId)
@@ -42,6 +47,7 @@ export async function deleteSpace(userId: string, spaceId: string) {
   })
 }
 
+/** Crea una invitación limitada al correo, con siete días de validez, y entrega su token una única vez. */
 export async function invite(userId: string, spaceId: string, email: string) {
   const value = createToken()
   const invitation = await mutateSpace(spaceId, userId, async (space, session) => {
@@ -63,6 +69,7 @@ export async function invite(userId: string, spaceId: string, email: string) {
   }, token: value }
 }
 
+/** Lista invitaciones dirigidas al usuario o pertenecientes al espacio del que es creador. */
 export async function listInvitations(userId: string) {
   const user = await User.findById(userId)
   if (!user) throw missing()
@@ -71,6 +78,7 @@ export async function listInvitations(userId: string) {
     .sort({ createdAt: -1 })
 }
 
+/** Acepta o rechaza un token vigente del destinatario; la aceptación respeta el máximo de dos miembros. */
 export async function respond(userId: string, value: string, accept: boolean) {
   const invitation = await Invitation.findOne({ tokenHash: hashToken(value) })
   if (!invitation) throw missing()

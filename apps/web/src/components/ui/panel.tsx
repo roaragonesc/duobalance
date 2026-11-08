@@ -16,6 +16,7 @@ type IconTileProps = {
   tone?: keyof typeof tileTones
 }
 
+/** Contenedor visual reutilizable para iconos con el tono indicado por la pantalla. */
 export function IconTile({ children, tone = 'mint' }: IconTileProps) {
   return (
     <span
@@ -35,6 +36,7 @@ type StatCardProps = {
   children?: ReactNode
 }
 
+/** Tarjeta de indicador con título accesible, importe en euros y contenido complementario. */
 export function StatCard({
   id,
   label,

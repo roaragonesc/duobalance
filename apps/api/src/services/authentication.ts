@@ -8,9 +8,12 @@ import type { Mailer } from './mail.js'
 
 const hour = 60 * 60 * 1000
 const passwordOptions = { type: argon2id, memoryCost: 65536, timeCost: 3, parallelism: 1 }
+/** Unifica el rechazo de acceso sin revelar si la cuenta existe o está confirmada. */
 const invalidCredentials = () => new ApiError(401, 'invalid_credentials', 'El correo electrónico o la contraseña no son correctos.')
+/** Unifica tokens inválidos, caducados o ya consumidos sin revelar detalles internos. */
 const invalidToken = () => new ApiError(400, 'invalid_token', 'El enlace no es válido o ha caducado.')
 
+/** Registra una cuenta sin sobrescribir existentes, almacena Argon2id y solicita confirmación por correo. */
 export async function register(input: { name: string; email: string; password: string }, mailer: Mailer) {
   const confirmationToken = createToken()
   const passwordHash = await hash(input.password, passwordOptions)
@@ -38,6 +41,7 @@ export async function register(input: { name: string; email: string; password: s
   }
 }
 
+/** Renueva el token de confirmación de una cuenta pendiente sin revelar si el correo existe. */
 export async function resendConfirmation(email: string, mailer: Mailer) {
   const value = createToken()
   const user = await User.findOneAndUpdate({ email, confirmed: false }, { $set: {
@@ -50,6 +54,7 @@ export async function resendConfirmation(email: string, mailer: Mailer) {
   }
 }
 
+/** Activa la cuenta mediante un token vigente de un uso y elimina sus datos de confirmación. */
 export async function confirmEmail(value: string) {
   const result = await User.updateOne({
     confirmed: false,
@@ -62,6 +67,7 @@ export async function confirmEmail(value: string) {
   if (result.modifiedCount !== 1) throw invalidToken()
 }
 
+/** Verifica una cuenta confirmada y crea una sesión de siete días con cookie y protección CSRF. */
 export async function login(email: string, password: string, dummyHash: string) {
   const user = await findCredentials(email)
   const valid = await verify(user?.passwordHash ?? dummyHash, password)
@@ -79,6 +85,7 @@ export async function login(email: string, password: string, dummyHash: string) 
   return { sessionToken, csrfToken, expiresAt, user: publicProfile(user) }
 }
 
+/** Emite recuperación de una hora para cuentas confirmadas sin revelar si el correo está registrado. */
 export async function forgotPassword(email: string, mailer: Mailer) {
   const value = createToken()
   const user = await User.findOneAndUpdate({ email, confirmed: true }, { $set: {
@@ -91,6 +98,7 @@ export async function forgotPassword(email: string, mailer: Mailer) {
   }
 }
 
+/** Consume un token vigente, actualiza Argon2id e invalida todas las sesiones por versión de autenticación. */
 export async function resetPassword(value: string, password: string) {
   const passwordHash = await hash(password, passwordOptions)
   const result = await User.updateOne({
@@ -103,6 +111,7 @@ export async function resetPassword(value: string, password: string) {
   if (result.modifiedCount !== 1) throw invalidToken()
 }
 
+/** Prepara un hash señuelo para verificar contraseñas incluso cuando no existe la cuenta. */
 export function createDummyHash() {
   return hash(createToken(), passwordOptions)
 }

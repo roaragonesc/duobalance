@@ -9,7 +9,10 @@
     "build": "tsc -p tsconfig.json",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "lint": "oxlint src",
-    "seed": "node --import tsx src/seeds/run.ts"
+    "seed": "node --import tsx src/seeds/run.ts",
+    "check": "node --env-file-if-exists=.env --import tsx src/check.ts",
+    "test:unit": "node --import tsx --test tests/*.test.ts",
+    "typecheck:unit": "tsc -p tsconfig.tests.json"
   },
   "dependencies": {
     "@duobalance/shared-types": "workspace:*",
