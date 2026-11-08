@@ -29,7 +29,8 @@ dist-demo/
 .env.*
 !.env.example
 !.env.demo
-playwright-report/
-test-results/
 coverage/
 *.log
+apps/api/.local-mail/
+apps/api/dist/
+apps/web/dist-demo/

@@ -1,0 +1,33 @@
+{
+  "users": [
+    { "key": "nuevo", "email": "nuevo@duobalance.test", "name": "Isabel", "description": "Sin espacio" },
+    { "key": "solo", "email": "solo@duobalance.test", "name": "Juan", "description": "Espacio sin pareja" },
+    { "key": "rocio", "email": "rocio@duobalance.test", "name": "Rocío", "description": "Pareja completa · creadora" },
+    { "key": "pablo", "email": "pablo@duobalance.test", "name": "Pablo", "description": "Pareja completa · invitado" },
+    { "key": "ines", "email": "ines@duobalance.test", "name": "Maria", "description": "Disponible para invitaciones" },
+    { "key": "mateo", "email": "mateo@duobalance.test", "name": "Curro", "description": "Disponible para invitaciones" }
+  ],
+  "expenses": [
+    { "description": "Alquiler", "amountCents": 55000, "categoryId": "housing", "kind": "shared", "by": "B" },
+    { "description": "Supermercado", "amountCents": 5680, "categoryId": "food", "kind": "shared", "by": "A" },
+    { "description": "Gasolina", "amountCents": 4500, "categoryId": "transport", "kind": "shared", "by": "A" },
+    { "description": "Internet y móvil", "amountCents": 3000, "categoryId": "utilities", "kind": "shared", "by": "B" },
+    { "description": "Cena fuera", "amountCents": 2400, "categoryId": "leisure", "kind": "shared", "by": "A" },
+    { "description": "Gimnasio", "amountCents": 3500, "categoryId": "health", "kind": "individual", "by": "A" },
+    { "description": "Peluquería", "amountCents": 1800, "categoryId": "other", "kind": "individual", "by": "B" }
+  ],
+  "incomes": [
+    { "description": "Nómina", "amountCents": 210000, "by": "A" },
+    { "description": "Nómina", "amountCents": 140000, "by": "B" },
+    { "description": "Venta de segunda mano", "amountCents": 4500, "by": "A" }
+  ],
+  "categories": [
+    { "key": "food", "name": "Alimentación", "icon": "food", "color": "#00704A" },
+    { "key": "housing", "name": "Vivienda", "icon": "housing", "color": "#6B35B8" },
+    { "key": "utilities", "name": "Servicios", "icon": "utilities", "color": "#1E5FB3" },
+    { "key": "transport", "name": "Transporte", "icon": "transport", "color": "#1E5FB3" },
+    { "key": "leisure", "name": "Ocio", "icon": "leisure", "color": "#B0244F" },
+    { "key": "health", "name": "Salud", "icon": "health", "color": "#8A5A00" },
+    { "key": "other", "name": "Otros", "icon": "other", "color": "#3E4C63" }
+  ]
+}

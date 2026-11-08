@@ -1,3 +1,0 @@
--- Datos de desarrollo local (se cargan con `npm run db:reset`).
--- No incluir datos reales ni credenciales. Los usuarios de prueba se crean
--- desde los tests mediante Supabase Auth, no aquí.

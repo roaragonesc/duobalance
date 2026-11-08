@@ -6,30 +6,32 @@ Vite y Tailwind CSS v4, con React Router en modo de datos
 
 ## Desarrollo
 
-- `npm install`: instalar las dependencias del proyecto.
-- `npm run dev`: iniciar Vite en modo mock (sin llamadas a Supabase).
-- `npm run dev:mock`: alias explícito del modo mock.
-- `npm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
-  (`VITE_DATA_MODE=mock`), sin conectar a Supabase.
-- `npm run test:e2e`: ejecutar los flujos Playwright en Chromium.
-- `npm run build`: comprobar TypeScript y generar la aplicación en `dist/`.
-- `npm run lint`: ejecutar Oxlint.
-- `npm run preview`: servir la compilación localmente.
+- `pnpm install`: instalar las dependencias de todos los workspaces.
+- `pnpm run dev`: iniciar Vite en modo mock (sin conectar al backend).
+- `pnpm run dev:mock`: alias explícito del modo mock.
+- `pnpm run dev:demo`: iniciar la demo en `http://localhost:5173` con `.env.demo`
+  (`VITE_DATA_MODE=mock`), sin conectar al backend.
+- `pnpm run backend:dev`: iniciar la API Express en `http://127.0.0.1:3001`.
+- `pnpm run dev:api`: iniciar la web con la API real, sin mocks, en `http://localhost:5173`.
+- `pnpm run backend:check`: comprobar conexión, transacciones y categorías sin escribir datos.
+- `pnpm run build`: comprobar TypeScript y compilar web y API.
+- `pnpm run lint`: ejecutar Oxlint en ambas aplicaciones.
+- `pnpm run preview`: servir la compilación localmente.
 
 ### Modo de datos
 
 El modo de desarrollo se configura con `VITE_DATA_MODE`:
 
 - `mock` (predeterminado): sustituye el proveedor de autenticación y todos los
-  servicios de datos por mocks locales. No inicia el cliente de Supabase ni
-  realiza peticiones a Auth, PostgREST o RPC.
-- `supabase`: usa los servicios reales. Requiere `VITE_SUPABASE_URL` y
-  `VITE_SUPABASE_PUBLISHABLE_KEY` en `.env.local`.
+  servicios de datos por mocks locales, sin peticiones a servicios externos.
+- `api`: usa el backend Express/MongoDB con cookies HttpOnly. Requiere iniciar
+  la API y cargar sus datos seed según [apps/api/README.md](apps/api/README.md).
 
-Para volver temporalmente a Supabase, cambia `VITE_DATA_MODE=supabase` en
-`.env.local` y reinicia Vite. También puedes definir esa variable antes de
-`npm run dev`. Para compilar producción, el modo debe ser `supabase`; Vite
-rechaza explícitamente una compilación configurada con `mock`.
+Para usar el backend, ejecuta `pnpm run dev:api` (prioriza API sobre la configuración
+mock local), o define `VITE_DATA_MODE=api` y reinicia Vite. El build normal
+usa API por defecto y rechaza empaquetar el modo mock. Node/MongoDB es el único
+backend del repositorio.
+La URI MongoDB solo se configura en `apps/api/.env`, nunca como variable `VITE_`.
 
 Las cuentas seed del modo mock (contraseña común `Demo1234!`) son:
 
@@ -52,82 +54,75 @@ Los gastos se muestran por fecha, del más reciente al más antiguo, tanto en
 la lista como en los últimos movimientos del dashboard. Si coinciden en fecha,
 aparece primero el último añadido; editarlo no cambia su orden de creación.
 
-La primera vez, instala Chromium para Playwright con
-`npx playwright install chromium`. Los E2E arrancan una instancia Vite aislada en el puerto `4174`,
-restablecen su escenario y comprueban que no se envíen peticiones a Supabase.
+## Pruebas de QA
 
-## Integración continua E2E
+La QA de aplicación vive en un framework específico
+separado. Aquí pueden vivir pruebas de desarrollador, como unitarias y tests
+de tooling. `npm run test:unit` ejecuta las unitarias del transporte, contratos y
+servicios HTTP y de la conexión transaccional con `node:test` y `tsx`, sin conectar
+a MongoDB ni levantar la API. `npm run typecheck:unit` comprueba esos tests y sus consumidores. El validador
+arquitectónico tiene sus propias pruebas con `node:test`.
+No duplicar las suites del framework externo.
+Este repositorio mantiene los principios Accessibility First y
+Testability First para que la aplicación siga siendo automatizable desde ese
+framework externo.
 
-El workflow [Playwright E2E](.github/workflows/playwright-daily.yml) se ejecuta:
+## Trabajo con agentes
 
-- Todos los días a las **03:00, hora peninsular española**.
-- Al abrir, reabrir o actualizar un Pull Request dirigido a **`master`**, la
-  rama predeterminada del repositorio.
-- Manualmente desde **Actions → Playwright E2E → Run workflow**, seleccionando
-  la rama y confirmando **Run workflow**.
+Consultar [inventario](docs/COMPONENT_INVENTORY.md),
+[workflow de seis fases](docs/AI_AGENT_WORKFLOW.md),
+[arquitectura](docs/ARCHITECTURE.md) y
+[buenas prácticas](docs/BEST_PRACTICES.md) antes de modificar código.
+El punto de entrada es [AGENTS.md](AGENTS.md). Selecciona **DuoBalance Fullstack
+Engineer** en Copilot Chat para cambios fullstack: coordina **React Frontend**,
+**Node Backend** y **Code Reviewer** cuando una tarea independiente lo justifica.
+También puedes seleccionar React o Node directamente. El revisor es de solo
+lectura. No se lanza todo el equipo por defecto ni se delegan archivos en conflicto.
 
-La programación usa `cron: '0 3 * * *'` con `timezone: Europe/Madrid`, admitido
-por la [sintaxis actual de GitHub Actions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onschedule).
-GitHub aplica los cambios de horario: 02:00 UTC en invierno y 01:00 UTC en
-verano, incluidas las fechas de transición. No basta con definir `TZ` en el
-runner para cambiar la hora del disparador.
+```text
+Fullstack → entender e inventariar → acordar contratos/asignaciones
+          → React / Node (solo trabajo independiente)
+          → revisión cuando aporte valor → integrar y verificar → reportar
+```
 
-El workflow debe estar integrado en `master` para habilitar la programación y
-el lanzamiento manual. Los eventos programados usan el último commit de esa
-rama. GitHub no garantiza puntualidad: puede retrasar o descartar ejecuciones
-con mucha carga, especialmente al inicio de cada hora. En repositorios públicos,
-los workflows programados se deshabilitan tras 60 días sin actividad.
+Después de cambiar fuentes, imports o exports:
 
-El job usa Ubuntu, Node.js 22 y `npm ci`; comprueba TypeScript (incluidos los
-tests) y el build mediante `npm run build`, ejecuta lint y pruebas unitarias,
-e instala Chromium con sus dependencias del sistema. El build de producción
-no se sirve ni se conecta a Supabase: se compila con `VITE_DATA_MODE=supabase`
-porque el build prohíbe empaquetar mocks. No necesita secretos ni credenciales.
+- `npm run inventory:update`: actualizar el bloque generado y revisar el diff.
+- `npm run lint:arch`: verificar inventario, imports AST, fronteras acordadas
+  y ciclos locales, incluidos los de tipos.
+- `npm run test:architecture`: ejecutar unitarias del propio validador.
+- `npm run typecheck:tooling`: comprobar TypeScript estricto del tooling.
 
-Para los E2E, Playwright arranca y detiene su propio Vite en
-`http://127.0.0.1:4174`, exclusivamente con `VITE_DATA_MODE=mock` y
-`VITE_MOCK_SHARED=1`, sin reutilizar servidores existentes. Cada test tiene un
-escenario aislado; los dos BrowserContexts de pareja comparten los datos de
-negocio mediante la cookie de escenario, pero mantienen sesiones independientes.
-La guardia de red bloquea peticiones externas y a Supabase en ambos contextos.
-
-Se ejecutan todos los specs de `tests/e2e/` con dos workers. Un fallo activo
-hace fallar el job, incluso si pasa en el reintento (`--fail-on-flaky-tests`);
-se conserva el reintento para capturar la traza de diagnóstico. Los casos
-pendientes deben seguir marcados con `test.fixme()`: se muestran como omitidos,
-**no como superados**. Actualmente los 20 tests existentes están activos.
-Esta suite no valida API, RLS ni Supabase real.
-
-### Consultar resultados y descargar informes
-
-1. Abre **Actions → Playwright E2E** y selecciona la ejecución (o el check del PR).
-2. Consulta el job **Chromium con datos mock** y el paso E2E para ver los tests
-   superados, fallidos y omitidos; un job que falla antes de E2E no certifica tests.
-3. En **Artifacts**, descarga `playwright-results-<run_id>-<run_attempt>` y
-   extrae el ZIP. Se conserva durante **14 días**, también si fallan las pruebas.
-4. Desde la raíz del proyecto, abre el HTML descargado con
-   `npx playwright show-report "<carpeta extraída>/playwright-report"`.
-   Conserva la carpeta completa, incluidos sus adjuntos.
-5. El ZIP también incluye `test-results/junit.xml` y las capturas/traces en
-   `test-results/artifacts/` cuando se generan. Para abrir una traza:
-   `npx playwright show-trace "<ruta al trace.zip>"`.
-
-El paso de subida se ejecuta con `always()`. Si la instalación o el build falla
-antes de ejecutar Playwright, puede no haber informes; GitHub mostrará el aviso
-correspondiente, sin ocultar el error original. Una cancelación forzada o un fallo
-del runner también puede impedir subir los artifacts.
+No requieren dependencias nuevas: se usa el TypeScript instalado en web y el
+runner de Node. [Arquitectura](docs/ARCHITECTURE.md) documenta exclusiones y
+limitaciones; estos controles no certifican QA, accesibilidad ni seguridad.
+El alias `check:architecture` sigue disponible. CI ejecuta el typecheck y las
+unitarias del tooling, `typecheck:unit` y `test:unit` de web/API,
+`lint:arch`, lint y los builds normal y demo. Las unitarias no conectan a MongoDB.
+Si Copilot no ofrece delegación, usa selección manual o Fullstack directamente
+y comunica la limitación; no simules ejecuciones de agentes.
 
 ## Arquitectura
 
+### Backend propio con MongoDB
+
+La implementación modular y su estado real están en
+[apps/api/README.md](apps/api/README.md): inventario, mapa de endpoints,
+OpenAPI, configuración privada y ejecución local.
+Incluye autenticación, perfiles, espacios, invitaciones, categorías, gastos,
+ingresos, balances y liquidaciones, seed idempotente y adaptadores React API.
+Los mocks de desarrollo se conservan. La conexión/carga Atlas
+no se presupone: requiere `apps/api/.env` guardado y verificación real.
+No definir una URI MongoDB como variable `VITE_` ni compartir sus credenciales.
+
 ### Demo estática en GitHub Pages
 
-La demo se compila por separado con `npm run build:demo` en `dist-demo/`.
-Para probarla localmente: `npm run preview:demo` y abrir
+La demo se compila por separado con `pnpm run build:demo` en
+`apps/web/dist-demo/`.
+Para probarla localmente: `pnpm run preview:demo` y abrir
 `http://127.0.0.1:4175/duobalance/`. Usa rutas hash (`#/login`) para permitir
-recargas en GitHub Pages. No carga archivos `.env`, no usa Supabase y nunca
-habilita el servidor compartido E2E. El build normal conserva su bloqueo de mocks.
-`npm run test:demo` compila y comprueba la demo estática en Chromium con viewport
-móvil, recarga de rutas, persistencia, confirmación y recuperación simuladas.
+recargas en GitHub Pages. No carga archivos `.env` ni habilita el servidor
+compartido de mocks. El build normal conserva su bloqueo de mocks.
 
 Solo deben introducirse datos ficticios: las cuentas y contraseñas mock se
 guardan en el navegador, sin protección para datos reales. Cada dispositivo
@@ -139,7 +134,7 @@ Para publicar (el repositorio puede permanecer privado, con un plan compatible):
 1. En GitHub, Settings → Pages → Source: **GitHub Actions**.
 2. Si el entorno `github-pages` restringe ramas, autorizar `ro-dev`.
 3. Subir los cambios a `ro-dev`. El workflow `demo-pages.yml` compila y publica
-   únicamente `dist-demo/`, sin código fuente ni mapas de fuentes.
+   únicamente `apps/web/dist-demo/`, sin código fuente ni mapas de fuentes.
 4. Consultar el resultado en Actions. URL prevista:
    `https://roaragonesc.github.io/duobalance/`.
 
@@ -148,37 +143,37 @@ visibilidad del repositorio para habilitar Pages. Este despliegue no es la
 aplicación de producción ni certifica el backend financiero.
 
 ```text
-src/
-  assets/               Logotipos DuoBalance (fondo oscuro y claro)
-  components/
-    layout/             AppLayout, AuthLayout, AuthLightLayout,
-                        OnboardingLayout, SimpleLayout y marca compartida
-    ui/                 TextField, SubmitButton, FormAlert, MintWave e iconos
-  pages/                Pantallas enrutables y páginas provisionales
-  features/
-    auth/               Servicio, validaciones y componentes de autenticación
-    spaces/             Servicio, validaciones y componentes de espacios
-    expenses/
-    incomes/
-    balance/
-  hooks/                useValidatedForm (validación, foco y envío único)
-  lib/supabase/         Cliente de Supabase y tipos de la base de datos
-  routes/               Router y catálogo de navegación de la aplicación
-  types/                Reservada para tipos compartidos
-demo/                   Adaptadores mock solo para desarrollo
-tests/e2e/              Flujos E2E independientes con Playwright
+.github/
+  agents/               Coordinador fullstack, React, Node y revisor de lectura
+  instructions/          Reglas de React, Node, arquitectura y QA
+  workflows/             CI y publicación de la demo
+AGENTS.md                Entrada del gobierno y ownership del equipo
+docs/                    Inventario, workflow, arquitectura, buenas prácticas, ADRs y UX
+apps/
+  web/
+    src/app/             Providers y router
+    src/features/        Lógica y componentes por funcionalidad
+    src/components/      UI y layouts compartidos
+    src/services/api/    Transporte y adaptadores HTTP
+  api/src/               Express + MongoDB, capas de API
+packages/
+  shared-types/          Contratos públicos entre aplicaciones
+  shared-schemas/        Validación compartida en runtime
+scripts/                 Comprobaciones de límites entre workspaces
+shared/
+  mockData.json         Fixtures usados por la demo y el seed de la API
 ```
 
-`App.tsx` monta el router y el enlace accesible para saltar al contenido.
+`apps/web/src/app/App.tsx` monta el router y el enlace accesible para saltar al contenido.
 Los layouts definen la estructura y renderizan las páginas mediante `Outlet`.
 La lógica de cada formulario vive en `features/` (validación y servicio) y en
 `hooks/useValidatedForm`; las páginas solo componen la interfaz.
 
-`routes/screens.ts` centraliza las rutas de la aplicación privada para que la
+`apps/web/src/app/router/screens.ts` centraliza las rutas de la aplicación privada para que la
 navegación y el router no diverjan. Los servicios mantienen contratos
 TypeScript comunes; durante desarrollo, el plugin de Vite sustituye sus
 implementaciones y el proveedor de autenticación por los adaptadores mock de
-`demo/`. El plugin solo se habilita con `VITE_DATA_MODE=mock` y con el servidor
+`apps/web/demo/`. El plugin solo se habilita con `VITE_DATA_MODE=mock` y con el servidor
 de desarrollo; el build de producción nunca empaqueta los mocks.
 
 ## Rutas
@@ -210,95 +205,6 @@ en móvil. `NavLink` marca la ruta activa con `aria-current="page"`.
 Se conservan el plugin de Tailwind v4 y los colores definidos en `src/index.css`:
 Navy `#0B2038`, Mint `#47DDB9` e Ice `#EAF6FA`.
 
-## Backend (Supabase)
-
-Estado: **integración conservada**. En desarrollo el modo predeterminado es mock;
-ningún servicio real de Supabase se usa mientras `VITE_DATA_MODE=mock`. Al
-seleccionar `supabase`, Login, registro,
-recuperación y cambio de contraseña usan Supabase Auth. Las rutas de la app
-y el onboarding exigen sesión (`ProtectedRoute`); login y registro redirigen
-si ya hay sesión (`PublicOnlyRoute`). «Crea tu espacio» llama a la función
-`create_space` (espacio + creador en una transacción). «Invitar pareja» llama a
-`create_invitation`, que devuelve un enlace `/join?token=…` de un solo uso
-(7 días, ligado al correo invitado; solo se guarda el hash SHA-256 del token).
-Supabase no envía ese correo: se copia o se abre en el cliente de correo.
-En `/join` el invitado inicia sesión o se registra y pulsa «Aceptar
-invitación» (`accept_invitation`, idempotente y transaccional).
-
-### Proyecto en la nube (pasos manuales)
-
-1. SQL Editor: ejecutar, en orden, las migraciones de `supabase/migrations/`
-   que aún no estén aplicadas, o mejor `npx supabase db push --remote` con el proyecto
-   enlazado (`npx supabase login` + `npx supabase link`). Si una migración ya se
-   ejecutó a mano, registrarla sin volver a ejecutarla con
-   `npx supabase migration repair --status applied <versión> --remote`.
-2. Authentication → URL Configuration: Site URL `http://localhost:5173` y
-   Redirect URLs `http://localhost:5173/**` y `http://127.0.0.1:5173/**`.
-   Selecciona `VITE_DATA_MODE=supabase` y abre la app en
-   `http://localhost:5173` (`npm run dev` ya usa ese origen):
-   con PKCE el enlace del correo solo funciona en el mismo navegador y origen
-   donde te registraste. Los enlaces de confirmación llegan a `/auth/callback`,
-   que inicia la sesión, gestiona los errores (`otp_expired`…) y permite reenviar
-   el correo. `npm run test:unit` prueba este flujo con Vitest y jsdom.
-3. Authentication → Providers → Email: mínimo 8 caracteres con minúsculas,
-   mayúsculas y números; confirmación de correo activada.
-4. Probar el registro con el correo de la cuenta de Supabase (el SMTP
-   incluido solo envía a miembros del equipo).
-
-- `src/lib/supabase/client.ts`: cliente único (`getSupabaseClient`) con
-  sesión persistente y flujo PKCE. Solo usa la clave pública.
-- `src/lib/supabase/database.types.ts`: tipos de la base de datos
-  (regenerar con `npm run db:types`).
-- `src/features/*/services` y `src/features/*/types`: servicios y tipos por
-  funcionalidad.
-- `supabase/config.toml`: Auth local con confirmación de correo, contraseña
-  de 8 caracteres con mayúscula, minúscula y número, y URLs de redirección
-  de Vite (`5173` y `4173`).
-- `supabase/migrations/`: esquema versionado. Primera migración: `profiles`
-  con RLS (cada usuario solo lee y edita su perfil) y alta automática al
-  registrarse.
-
-### Pruebas de base de datos
-
-`npm run test:db` arranca un PostgreSQL 17 real sin Docker (`embedded-postgres`),
-simula lo mínimo de Supabase (roles `anon`/`authenticated`, `auth.users`,
-`auth.uid()` y sus privilegios por defecto), aplica las migraciones en orden y
-comprueba esquema, permisos, RLS, funciones RPC, triggers, invitaciones y
-concurrencia real con dos conexiones simultáneas. No sustituye a una prueba
-final en un Supabase local (`npm run db:start`, requiere Docker).
-
-### Puesta en marcha local
-
-Requiere Docker Desktop (gratuito para uso personal) para la pila local.
-
-```bash
-npm run db:start      # levanta Postgres, Auth y Mailpit
-npm run db:status     # muestra API URL y publishable key
-cp .env.example .env.local   # y pega esos valores
-npm run db:reset      # aplica migraciones y seed.sql
-npm run db:types      # regenera los tipos TypeScript
-```
-
-Los correos locales no se envían de verdad: se ven en Mailpit
-(`http://127.0.0.1:54324`).
-
-### Plan gratuito de Supabase (comprobado en la documentación oficial)
-
-- El SMTP incluido solo envía **2 correos por hora** y únicamente a miembros
-  del equipo del proyecto; no es apto para usuarios reales. Para producción
-  hace falta un SMTP propio (hay proveedores con plan gratuito).
-- Supabase Auth no envía correos de invitación personalizados a terceros:
-  las invitaciones de pareja se compartirán mediante un enlace seguro.
-- Otros límites del plan Free (cuotas de base de datos, usuarios activos,
-  pausa por inactividad) pueden cambiar: consúltalos en
-  <https://supabase.com/pricing> antes de crear el proyecto.
-
-### URLs de redirección
-
-- Local: `http://127.0.0.1:5173/**`, `http://localhost:5173/**` y las de
-  `vite preview` (`4173`).
-- Producción: añadir `https://<dominio>/**` en Authentication → URL
-  Configuration y fijarlo como Site URL.
 ## Despliegue
 
 El router utiliza URLs limpias con el historial del navegador. El alojamiento
@@ -307,7 +213,6 @@ se abren directamente o se recargan, sin reescribir los recursos estáticos.
 Vite ya proporciona este comportamiento durante desarrollo y preview.
 
 Todavía no hay service worker, instalación PWA ni funcionamiento offline.
-Playwright cubre los principales flujos de autenticación y espacios en modo mock.
 
 ## Accessibility First + Testability First
 
@@ -325,7 +230,3 @@ El contrato obligatorio está en
 - El paso actual del onboarding se marca con `aria-current="step"`; los pasos completados son enlaces y el botón «Volver» es un enlace definido por `handle.backTo` en la ruta.
 - Todas las pantallas comparten tamaños (campos 52 px, botón 54 px, títulos 34 px) y el componente `Logo` en alta resolución.
 - Ningún control necesita `data-testid`.
-
-Notas para Playwright: `getByLabel` busca por subcadena, así que se necesita
-`exact: true` en `getByLabel('Contraseña', { exact: true })` (Registro) y
-`getByLabel('Nueva contraseña', { exact: true })` (nueva contraseña).
